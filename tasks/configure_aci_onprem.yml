@@ -11,8 +11,7 @@
   delegate_to: localhost
   register: out
 
-- debug: 
-  var: out.stdout_lines
+- debug: var=out
 
 #- name: Create EPG
 #  aci_epg:
