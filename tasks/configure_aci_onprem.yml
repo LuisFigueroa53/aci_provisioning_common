@@ -23,8 +23,8 @@
       <fvTenant name="{{ aci_tenant }}">
         <fvAp name="{{ aci_ap }}">
           <fvAEPg name="{{ aci_epg }}">
-            <vzProvSubjLbl name="{{ vrf }}" tag="black" />
-            <vzConsSubjLbl name="{{ vrf }}" tag="black" />
+            <vzProvSubjLbl name="{{ aci_vrf }}" tag="black" />
+            <vzConsSubjLbl name="{{ aci_vrf }}" tag="black" />
           </fvAEPg>
         </fvAp>
       </fvTenant>
@@ -39,7 +39,7 @@
     tenant: "{{ aci_tenant }}"
     ap: "{{ aci_ap }}"
     epg: "{{ aci_epg }}"
-    contract: permitAny-{{ vrf }}
+    contract: "permitAny-{{ aci_vrf }}"
     contract_type: "{{ item }}"
   with_items:
     - consumer
@@ -57,5 +57,5 @@
     epg: "{{ aci_epg }}"
     domain_type: vmm
     vm_provider: vmware
-    domain: "{{ vcenter }}"
+    domain: "{{ vcenter_host }}"
 
