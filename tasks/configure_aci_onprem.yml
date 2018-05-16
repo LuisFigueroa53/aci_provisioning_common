@@ -14,7 +14,7 @@
 #- debug: var=out['current'][0]['fvAp']
 
 - fail: msg="Invalid AP"
-  when: out['current'][0]['fvAp'] is not defined
+  when: out['current'][0] is not defined
 
 #- name: Create EPG
 #  aci_epg:
