@@ -58,4 +58,5 @@
     domain_type: vmm
     vm_provider: vmware
     domain: "{{ vcenter_host }}"
+  delegate_to: localhost
 
