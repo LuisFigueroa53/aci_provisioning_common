@@ -11,10 +11,10 @@
   delegate_to: localhost
   register: out
 
-- debug: var=out
+- debug: var=out[current][0][fvAp]
 
-- fail: msg="Invalid AP"
-  when: out[0][fvAp] is not defined
+#- fail: msg="Invalid AP"
+#  when: out[0][fvAp] is not defined
 
 #- name: Create EPG
 #  aci_epg:
