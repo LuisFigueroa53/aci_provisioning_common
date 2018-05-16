@@ -70,8 +70,10 @@
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid vCenter Domain {{ vcenter_host }} "
-  when: out['current'][0] is not defined
+- debug: var=out
+
+#- fail: msg="Invalid vCenter Domain {{ vcenter_host }} "
+#  when: out['current'][0] is not defined
   
 #- name: Create EPG
 #  aci_epg:
