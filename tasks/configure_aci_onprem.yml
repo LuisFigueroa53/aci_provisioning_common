@@ -1,62 +1,73 @@
 ---
-- name: Create EPG
-  aci_epg:
+- name: Validate AP and Tenant
+  aci_ap:
     validate_certs: false
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
     tenant: "{{ aci_tenant }}"
     ap: "{{ aci_ap }}"
-    epg: "{{ aci_epg }}"
-    bd: "{{ aci_bd }}"
+    state: query
   delegate_to: localhost
 
-- name: Add Subject Labels to EPG
-  aci_rest:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    method: post
-    path: /api/mo/uni.xml
-    content:
-      <fvTenant name="{{ aci_tenant }}">
-        <fvAp name="{{ aci_ap }}">
-          <fvAEPg name="{{ aci_epg }}">
-            <vzProvSubjLbl name="{{ aci_vrf }}" tag="black" />
-            <vzConsSubjLbl name="{{ aci_vrf }}" tag="black" />
-          </fvAEPg>
-        </fvAp>
-      </fvTenant>
-  delegate_to: localhost
-
-- name: Add Contracts to EPG
-  aci_epg_to_contract:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
-    ap: "{{ aci_ap }}"
-    epg: "{{ aci_epg }}"
-    contract: "permitAny-{{ aci_vrf }}"
-    contract_type: "{{ item }}"
-  with_items:
-    - consumer
-    - provider
-  delegate_to: localhost
-
-- name: Add VMWare domain
-  aci_epg_to_domain:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
-    ap: "{{ aci_ap }}"
-    epg: "{{ aci_epg }}"
-    domain_type: vmm
-    vm_provider: vmware
-    domain: "{{ vcenter_host }}"
-  delegate_to: localhost
+#- name: Create EPG
+#  aci_epg:
+#    validate_certs: false
+#    host: "{{ aci_hostname }}"
+#    username: "{{ aci_username }}"
+#    password: "{{ aci_password }}"
+#    tenant: "{{ aci_tenant }}"
+#    ap: "{{ aci_ap }}"
+#    epg: "{{ aci_epg }}"
+#    bd: "{{ aci_bd }}"
+#  delegate_to: localhost
+#
+#- name: Add Subject Labels to EPG
+#  aci_rest:
+#    validate_certs: false
+#    host: "{{ aci_hostname }}"
+#    username: "{{ aci_username }}"
+#    password: "{{ aci_password }}"
+#    method: post
+#    path: /api/mo/uni.xml
+#    content:
+#      <fvTenant name="{{ aci_tenant }}">
+#        <fvAp name="{{ aci_ap }}">
+#          <fvAEPg name="{{ aci_epg }}">
+#            <vzProvSubjLbl name="{{ aci_vrf }}" tag="black" />
+#            <vzConsSubjLbl name="{{ aci_vrf }}" tag="black" />
+#          </fvAEPg>
+#        </fvAp>
+#      </fvTenant>
+#  delegate_to: localhost
+#
+#- name: Add Contracts to EPG
+#  aci_epg_to_contract:
+#    validate_certs: false
+#    host: "{{ aci_hostname }}"
+#    username: "{{ aci_username }}"
+#    password: "{{ aci_password }}"
+#    tenant: "{{ aci_tenant }}"
+#    ap: "{{ aci_ap }}"
+#    epg: "{{ aci_epg }}"
+#    contract: "permitAny-{{ aci_vrf }}"
+#    contract_type: "{{ item }}"
+#  with_items:
+#    - consumer
+#    - provider
+#  delegate_to: localhost
+#
+#- name: Add VMWare domain
+#  aci_epg_to_domain:
+#    validate_certs: false
+#    host: "{{ aci_hostname }}"
+#    username: "{{ aci_username }}"
+#    password: "{{ aci_password }}"
+#    tenant: "{{ aci_tenant }}"
+#    ap: "{{ aci_ap }}"
+#    epg: "{{ aci_epg }}"
+#    domain_type: vmm
+#    vm_provider: vmware
+#    domain: "{{ vcenter_host }}"
+#  delegate_to: localhost
 
