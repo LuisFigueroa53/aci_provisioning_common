@@ -11,7 +11,7 @@
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid Tenant {{ aci_tenant}} "
+- fail: msg="Invalid Tenant - {{ aci_tenant}} "
   when: out['current'][0] is not defined
 
 - name: Validate AP
@@ -26,7 +26,7 @@
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid AP {{ aci_ap}} "
+- fail: msg="Invalid AP - {{ aci_ap}} "
   when: out['current'][0] is not defined
 
 - name: Validate Bridge Domain
@@ -41,7 +41,7 @@
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid Bridge Domain {{ aci_bd}} "
+- fail: msg="Invalid Bridge Domain - {{ aci_bd}} "
   when: out['current'][0] is not defined
 
 - name: Validate VRF
@@ -56,7 +56,7 @@
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid VRF {{ aci_vrf}} "
+- fail: msg="Invalid VRF - {{ aci_vrf}} "
   when: out['current'][0] is not defined
 
 - name: Validate vCenter
@@ -70,7 +70,7 @@
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid vCenter Domain {{ vcenter_host }} "
+- fail: msg="Invalid vCenter Domain - {{ vcenter_host }} "
   when: out['imdata'][0] is not defined
   
 #- name: Create EPG
