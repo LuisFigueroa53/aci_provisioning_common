@@ -1,0 +1,5 @@
+---
+# Execute the specific OS action playbook
+- name: "Execute Configure UCSD"
+  include_tasks: configure_ucsaci_onprem.yml
+#

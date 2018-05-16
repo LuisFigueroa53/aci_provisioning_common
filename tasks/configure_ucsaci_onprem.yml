@@ -1,0 +1,42 @@
+---
+- name: "Create {{ ucs_vlan }} in {{ ucs_pod }}"
+  ucs_vlans:
+    hostname: "{{ ucs_pod }}"
+    username: "{{ ucsd_admin }}"
+    password: "{{ ucsd_password }}"
+    name: "{{ ucs_vlan }}" 
+    id: "{{ ucs_vlan_id }}"
+    native: 'no'
+    proxy: http://user:pass@atlproxy:8080/
+    use_proxy: true
+    state: present
+  delegate_to: localhost
+
+- name: "Configure {{ ucs_vlan }} on {{ ucs_vnic1 }}" 
+  raw: 'scope org {{ ucs_org }}; enter vnic-templ {{ ucs_vnic1 }} eth-if {{ ucs_vlan }}; commit-buffer'
+  register: vnic1
+
+- name: "Configure {{ ucs_vlan }} on {{ ucs_vnic2 }}"
+  raw: 'scope org {{ ucs_org }}; enter vnic-templ {{ ucs_vnic2 }} eth-if {{ ucs_vlan }}; commit-buffer'
+  register: vnic2
+
+- name: "Configure {{ ucs_vlan }} on port-channel A"
+  raw: 'scope eth-uplink; scope vlan {{ ucs_vlan }}; create member-port-channel A 2; commit-buffer'
+  register: portchannela
+  ignore_errors: true
+
+- name: "Check status of {{ ucs_vlan }} on port-channel A"
+  fail:
+    msg: "Failed to create {{ ucs_vlan }} on port-channel A"
+  when: 'portchannela.rc != 0 and "Error: Managed object already exists" not in portchannela.stdout'
+
+- name: "Configure {{ ucs_vlan }} on port-channel B"
+  raw: 'scope eth-uplink; scope vlan {{ ucs_vlan }}; create member-port-channel B 2; commit-buffer'
+  register: portchannelb
+  ignore_errors: true
+
+- name: "Check status of {{ ucs_vlan }} on port-channel B"
+  fail:
+    msg: "Failed to create {{ ucs_vlan }} on port-channel B"
+  when: 'portchannelb.rc != 0 and "Error: Managed object already exists" not in portchannelb.stdout'
+

@@ -1,0 +1,3 @@
+#Default Credentials - password in vault
+aci_username: 'apic:Local\admin'
+aci_password: certlab1
