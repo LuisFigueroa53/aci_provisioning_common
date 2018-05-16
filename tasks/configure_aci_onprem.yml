@@ -9,6 +9,9 @@
     ap: "{{ aci_ap }}"
     state: query
   delegate_to: localhost
+  register: out
+
+  - debug: var=out.stdout_lines
 
 #- name: Create EPG
 #  aci_epg:
