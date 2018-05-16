@@ -11,7 +11,7 @@
   delegate_to: localhost
   register: out
 
-- debug: var=out[0][fvAp]
+- debug: var=out
 
 - fail: msg="Invalid AP"
   when: out[0][fvAp] is not defined
