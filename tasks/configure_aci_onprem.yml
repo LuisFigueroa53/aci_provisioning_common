@@ -1,5 +1,20 @@
 ---
-- name: Validate AP and Tenant
+
+- name: Validate Tenant
+  aci_tenant:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid Tenant {{ aci_tenant}} "
+  when: out['current'][0] is not defined
+
+- name: Validate AP
   aci_ap:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -11,11 +26,53 @@
   delegate_to: localhost
   register: out
 
-#- debug: var=out['current'][0]['fvAp']
-
-- fail: msg="Invalid AP"
+- fail: msg="Invalid AP {{ aci_ap}} "
   when: out['current'][0] is not defined
 
+- name: Validate Bridge Domain
+  aci_bd:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    bd: "{{ aci_bd }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid Bridge Domain {{ aci_bd}} "
+  when: out['current'][0] is not defined
+
+- name: Validate VRF
+  aci_vrf:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    vrf: "{{ aci_vrf }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid VRF {{ aci_vrf}} "
+  when: out['current'][0] is not defined
+
+- name: Validate vCenter
+  aci_rest:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    method: get
+    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vcenter_host }}")
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid vCenter Domain {{ vcenter_host }} "
+  when: out['current'][0] is not defined
+  
 #- name: Create EPG
 #  aci_epg:
 #    validate_certs: false
