@@ -11,7 +11,6 @@
   set_fact:
     aci_vrf: "DV"
   when: aci_vrf == "DF" or aci_vrf == "DB"
-  delegate_to: localhost
 
 - name: Validate Tenant
   aci_tenant:
