@@ -1,6 +1,6 @@
 ---
 
--name: Set Global Vars
+- name: Set Global Vars
   set_fact:
     aci_tn_name: "{{ aci_vlan_name.split('|')[0] }}"
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] }}"
