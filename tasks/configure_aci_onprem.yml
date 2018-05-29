@@ -1,6 +1,6 @@
 ---
 
-- name: Validate Tenant {{ aci_tn_name }}
+- name: Validate Tenant -- {{ aci_tn_name }}
   aci_tenant:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -15,7 +15,7 @@
   fail: msg="Invalid Tenant - {{ aci_tn_name }} "
   when: out['current'][0] is not defined
 
-- name: Validate AP {{ aci_ap_name }}
+- name: Validate AP -- {{ aci_ap_name }}
   aci_ap:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -31,7 +31,7 @@
   fail: msg="Invalid AP - {{ aci_ap_name }} "
   when: out['current'][0] is not defined
 
-- name: Validate Bridge Domain {{ aci_bd_name }}
+- name: Validate Bridge Domain -- {{ aci_bd_name }}
   aci_bd:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -47,7 +47,7 @@
   fail: msg="Invalid Bridge Domain - {{ aci_bd_name }} "
   when: out['current'][0] is not defined
 
-- name: Validate VRF {{ aci_vrf_name }}
+- name: Validate VRF -- {{ aci_vrf_name }}
   aci_vrf:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -63,7 +63,7 @@
   fail: msg="Invalid VRF - {{ aci_vrf_name }} "
   when: out['current'][0] is not defined
 
-- name: Validate vCenter {{ vcenter_datacenter }}
+- name: Validate vCenter -- {{ vcenter_datacenter }}
   aci_rest:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -78,7 +78,7 @@
   fail: msg="Invalid vCenter Domain - {{ vcenter_datacenter }} "
   when: out['imdata'][0] is not defined
   
-- name: Create EPG {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
+- name: Create EPG -- {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
   aci_epg:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -125,7 +125,7 @@
     - provider
   delegate_to: localhost
 
-- name: Add VMWare domain {{ vcenter_datacenter }}
+- name: Add VMWare domain -- {{ vcenter_datacenter }}
   aci_epg_to_domain:
     validate_certs: false
     host: "{{ aci_hostname }}"
