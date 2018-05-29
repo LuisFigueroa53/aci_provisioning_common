@@ -4,7 +4,7 @@
   set_fact:
     aci_tn_name: "{{ aci_vlan_name.split('|')[0] }}"
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] }}"
-    aci_epg_name: "{{ aci_vlan_name.split('|')[0] }}"
+    aci_epg_name: "{{ aci_vlan_name.split('|')[2] }}"
     aci_vrf_name: "{{ aci_bd_name.split('-')[0] }}"
 
 - name: Set DV VRF
