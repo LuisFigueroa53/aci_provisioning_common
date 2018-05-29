@@ -6,11 +6,13 @@
     aci_ap: "{{ aci_vlan_name.split('|')[1] }}"
     aci_epg: "{{ aci_vlan_name.split('|')[0] }}"
     aci_vrf: "{{ aci_vlan_name.split('|')[0][0:3] }}"
+  delegate_to: localhost
 
 - name: Set DV VRF
   set_fact:
     aci_vrf: "DV"
   when: aci_vrf == "DF" or aci_vrf == "DB"
+  delegate_to: localhost
 
 - name: Validate Tenant
   aci_tenant:
