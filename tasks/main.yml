@@ -1,4 +1,17 @@
 ---
+
+-name: Set Global Vars
+  set_fact:
+    aci_tn_name: "{{ aci_vlan_name.split('|')[0] }}"
+    aci_ap_name: "{{ aci_vlan_name.split('|')[1] }}"
+    aci_epg_name: "{{ aci_vlan_name.split('|')[0] }}"
+    aci_vrf_name: "{{ aci_vlan_name.split('|')[0][0:3] }}"
+
+- name: Set DV VRF
+  set_fact:
+    aci_vrf_name: "DV"
+  when: aci_vrf_name == "DF" or aci_vrf_name == "DB"
+
 # Execute the specific OS action playbook
 - name: "Execute Configure ACI"
   include_tasks: configure_aci_onprem.yml
