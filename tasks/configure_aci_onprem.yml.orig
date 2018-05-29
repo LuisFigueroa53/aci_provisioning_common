@@ -1,0 +1,135 @@
+---
+
+- name: Validate Tenant
+  aci_tenant:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid Tenant - {{ aci_tenant}} "
+  when: out['current'][0] is not defined
+
+- name: Validate AP
+  aci_ap:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    ap: "{{ aci_ap }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid AP - {{ aci_ap}} "
+  when: out['current'][0] is not defined
+
+- name: Validate Bridge Domain
+  aci_bd:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    bd: "{{ aci_bd }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid Bridge Domain - {{ aci_bd}} "
+  when: out['current'][0] is not defined
+
+- name: Validate VRF
+  aci_vrf:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    vrf: "{{ aci_vrf }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid VRF - {{ aci_vrf}} "
+  when: out['current'][0] is not defined
+
+- name: Validate vCenter
+  aci_rest:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    method: get
+    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vcenter_host }}")
+  delegate_to: localhost
+  register: out
+
+- fail: msg="Invalid vCenter Domain - {{ vcenter_host }} "
+  when: out['imdata'][0] is not defined
+  
+- name: Create EPG
+  aci_epg:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    ap: "{{ aci_ap }}"
+    epg: "{{ aci_epg }}"
+    bd: "{{ aci_bd }}"
+  delegate_to: localhost
+
+- name: Add Subject Labels to EPG
+  aci_rest:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    method: post
+    path: /api/mo/uni.xml
+    content:
+      <fvTenant name="{{ aci_tenant }}">
+        <fvAp name="{{ aci_ap }}">
+          <fvAEPg name="{{ aci_epg }}">
+            <vzProvSubjLbl name="{{ aci_vrf }}" tag="black" />
+            <vzConsSubjLbl name="{{ aci_vrf }}" tag="black" />
+          </fvAEPg>
+        </fvAp>
+      </fvTenant>
+  delegate_to: localhost
+
+- name: Add Contracts to EPG
+  aci_epg_to_contract:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    ap: "{{ aci_ap }}"
+    epg: "{{ aci_epg }}"
+    contract: "permitAny-{{ aci_vrf }}"
+    contract_type: "{{ item }}"
+  with_items:
+    - consumer
+    - provider
+  delegate_to: localhost
+
+- name: Add VMWare domain
+  aci_epg_to_domain:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tenant }}"
+    ap: "{{ aci_ap }}"
+    epg: "{{ aci_epg }}"
+    domain_type: vmm
+    vm_provider: vmware
+    domain: "{{ vcenter_host }}"
+  delegate_to: localhost
