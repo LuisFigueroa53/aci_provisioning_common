@@ -2,15 +2,15 @@
 
 -name: Set Global Vars
   set_fact:
-    aci_tenant: "{{ aci_vlan_name.split('|')[0] }}"
-    aci_ap: "{{ aci_vlan_name.split('|')[1] }}"
-    aci_epg: "{{ aci_vlan_name.split('|')[0] }}"
-    aci_vrf: "{{ aci_vlan_name.split('|')[0][0:3] }}"
+    aci_tn_name: "{{ aci_vlan_name.split('|')[0] }}"
+    aci_ap_name: "{{ aci_vlan_name.split('|')[1] }}"
+    aci_epg_name: "{{ aci_vlan_name.split('|')[0] }}"
+    aci_vrf_name: "{{ aci_vlan_name.split('|')[0][0:3] }}"
 
 - name: Set DV VRF
   set_fact:
-    aci_vrf: "DV"
-  when: aci_vrf == "DF" or aci_vrf == "DB"
+    aci_vrf_name: "DV"
+  when: aci_vrf_name == "DF" or aci_vrf_name == "DB"
 
 - name: Validate Tenant
   aci_tenant:
@@ -18,12 +18,12 @@
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
+    tenant: "{{ aci_tn_name }}"
     state: query
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid Tenant - {{ aci_tenant}} "
+- fail: msg="Invalid Tenant - {{ aci_tn_name }} "
   when: out['current'][0] is not defined
 
 - name: Validate AP
@@ -32,13 +32,13 @@
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
-    ap: "{{ aci_ap }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
     state: query
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid AP - {{ aci_ap}} "
+- fail: msg="Invalid AP - {{ aci_ap_name }} "
   when: out['current'][0] is not defined
 
 - name: Validate Bridge Domain
@@ -47,13 +47,13 @@
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
-    bd: "{{ aci_bd }}"
+    tenant: "{{ aci_tn_name }}"
+    bd: "{{ aci_bd_name }}"
     state: query
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid Bridge Domain - {{ aci_bd}} "
+- fail: msg="Invalid Bridge Domain - {{ aci_bd_name }} "
   when: out['current'][0] is not defined
 
 - name: Validate VRF
@@ -62,13 +62,13 @@
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
-    vrf: "{{ aci_vrf }}"
+    tenant: "{{ aci_tn_name }}"
+    vrf: "{{ aci_vrf_name }}"
     state: query
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid VRF - {{ aci_vrf}} "
+- fail: msg="Invalid VRF - {{ aci_vrf_name }} "
   when: out['current'][0] is not defined
 
 - name: Validate vCenter
@@ -78,11 +78,11 @@
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
     method: get
-    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vcenter_host }}")
+    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vcenter_datacenter }}")
   delegate_to: localhost
   register: out
 
-- fail: msg="Invalid vCenter Domain - {{ vcenter_host }} "
+- fail: msg="Invalid vCenter Domain - {{ vcenter_datacenter }} "
   when: out['imdata'][0] is not defined
   
 - name: Create EPG
@@ -91,10 +91,10 @@
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
-    ap: "{{ aci_ap }}"
-    epg: "{{ aci_epg }}"
-    bd: "{{ aci_bd }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    epg: "{{ aci_epg_name }}"
+    bd: "{{ aci_bd_name }}"
   delegate_to: localhost
 
 - name: Add Subject Labels to EPG
@@ -106,11 +106,11 @@
     method: post
     path: /api/mo/uni.xml
     content:
-      <fvTenant name="{{ aci_tenant }}">
-        <fvAp name="{{ aci_ap }}">
-          <fvAEPg name="{{ aci_epg }}">
-            <vzProvSubjLbl name="{{ aci_vrf }}" tag="black" />
-            <vzConsSubjLbl name="{{ aci_vrf }}" tag="black" />
+      <fvTenant name="{{ aci_tn_name }}">
+        <fvAp name="{{ aci_ap_name }}">
+          <fvAEPg name="{{ aci_epg_name }}">
+            <vzProvSubjLbl name="{{ aci_vrf_name }}" tag="black" />
+            <vzConsSubjLbl name="{{ aci_vrf_name }}" tag="black" />
           </fvAEPg>
         </fvAp>
       </fvTenant>
@@ -122,10 +122,10 @@
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
-    ap: "{{ aci_ap }}"
-    epg: "{{ aci_epg }}"
-    contract: "permitAny-{{ aci_vrf }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    epg: "{{ aci_epg_name }}"
+    contract: "permitAny-{{ aci_vrf_name }}"
     contract_type: "{{ item }}"
   with_items:
     - consumer
@@ -138,9 +138,9 @@
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
-    tenant: "{{ aci_tenant }}"
-    ap: "{{ aci_ap }}"
-    epg: "{{ aci_epg }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    epg: "{{ aci_epg_name }}"
     domain_type: vmm
     vm_provider: vmware
     domain: "{{ vcenter_datacenter }}"
