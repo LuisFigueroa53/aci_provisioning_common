@@ -143,5 +143,5 @@
     epg: "{{ aci_epg }}"
     domain_type: vmm
     vm_provider: vmware
-    domain: "{{ vcenter_host }}"
+    domain: "{{ vcenter_datacenter }}"
   delegate_to: localhost
