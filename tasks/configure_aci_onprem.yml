@@ -1,5 +1,17 @@
 ---
 
+-name: Set Global Vars
+  set_fact:
+    aci_tenant: "{{ aci_vlan_name.split('|')[0] }}"
+    aci_ap: "{{ aci_vlan_name.split('|')[1] }}"
+    aci_epg: "{{ aci_vlan_name.split('|')[0] }}"
+    aci_vrf: "{{ aci_vlan_name.split('|')[0][0:3] }}"
+
+- name: Set DV VRF
+  set_fact:
+    aci_vrf: "DV"
+  when: aci_vrf == "DF" or aci_vrf == "DB"
+
 - name: Validate Tenant
   aci_tenant:
     validate_certs: false
