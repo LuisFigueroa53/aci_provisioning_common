@@ -102,8 +102,8 @@
       <fvTenant name="{{ aci_tn_name }}">
         <fvAp name="{{ aci_ap_name }}">
           <fvAEPg name="{{ aci_epg_name }}">
-            <vzProvSubjLbl name="{{ aci_vrf_name }}" tag="black" />
-            <vzConsSubjLbl name="{{ aci_vrf_name }}" tag="black" />
+            <vzProvSubjLbl name="{{ aci_complex }}" tag="black" />
+            <vzConsSubjLbl name="{{ aci_complex }}" tag="black" />
           </fvAEPg>
         </fvAp>
       </fvTenant>
