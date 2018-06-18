@@ -4,7 +4,7 @@
   fail: msg="Bad format for aci_vlan_name - should be <tn>|<ap>|<vrf>_<workload> -- name provided was {{ aci_vlan_name }}"
   when: aci_vlan_name is not match "\w+\|\w+\|\w{2}_\w+"
 
-- name: Set TN, AP, EPG Vars
+- name: Set TN, AP, EPG, Complex Vars
   set_fact:
     aci_tn_name: "{{ aci_vlan_name.split('|')[0] | trim }}"
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] | trim }}"
@@ -37,8 +37,10 @@
   fail: msg="Bad format for aci_bd_name - should be <vrf>-<ap> -- name provided was {{ aci_bd_name }}"
   when: aci_bd_name is not match "\w{2}-\w+"
   
-- name: Set VRF Var
-  set_fact: aci_vrf_name="{{ aci_bd_name.split('-')[0] | trim }}"
+- name: Set VRF and Complex
+  set_fact: 
+    aci_complex="{{ aci_bd_name.split('-')[0] | trim }}"
+    aci_vrf_name="{{ aci_bd_name.split('-')[0] | trim }}"
 
 - name: Adjust VRF name if DevLab
   set_fact: aci_vrf_name="DV"
@@ -54,13 +56,13 @@
   set_fact: vcenter_datacenter="VCSELABATL-NetEng"
 - name: Adjust VM Datacenter if Prod
   set_fact: vcenter_datacenter="ADC-UCS"
-  when: (aci_bd_name[0:2] == "TF") or (aci_bd_name[0:2] == "TB")
+  when: (aci_complex == "TF") or (aci_complex == "TB")
 - name: Adjust VM Datacenter if UAT
   set_fact: vcenter_datacenter="ADC-DVPP02"
-  when: (aci_bd_name[0:2] == "UF") or (aci_bd_name[0:2] == "UB")
+  when: (aci_complex == "UF") or (aci_complex == "UB")
 - name: Adjust VM Datacenter if DV or PP
   set_fact: vcenter_datacenter="DAT02-PPUCS-005"
-  when: (aci_bd_name[0:2] == "DF") or (aci_bd_name[0:2] == "DB") or (aci_bd_name[0:2] == "CF") or (aci_bd_name[0:2] == "CB")
+  when: (aci_complex == "DF") or (aci_complex == "DB") or (aci_complex == "CF") or (aci_complex == "CB")
 
 # Execute the specific OS action playbook
 - name: "Execute Configure ACI"
