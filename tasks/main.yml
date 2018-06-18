@@ -44,16 +44,29 @@
   set_fact: aci_vrf_name="DV"
   when: (aci_vrf_name == "DF") or (aci_vrf_name == "DB")
 
-- name: Set Default VM Datacenter to non-prod
-  set_fact: vcenter_datacenter="DAT02-PPUCS-005"
+#- name: Set Default VM Datacenter to non-prod
+#  set_fact: vcenter_datacenter="DAT02-PPUCS-005"
+#- name: Adjust VM Datacenter if Prod
+#  set_fact: vcenter_datacenter="ADC-UCS"
+#  when: (aci_bd_name[0:3] == "TF") or (aci_bd_name[0:3] == "TB")
+#- name: Adjust VM Datacenter if UAT
+#  set_fact: vcenter_datacenter="ACD_UCS"
+#  when: (aci_bd_name[0:3] == "UF") or (aci_bd_name[0:3] == "UB")
+#- name: Adjust VM Datacenter if CertLab
+#  set_fact: vcenter_datacenter=""
 
-- name: Adjust VM Datacenter if Prod
-  set_fact: vcenter_datacenter="ADC-UCS"
-  when: (aci_bd_name[0:3] == "TF") or (aci_bd_name[0:3] == "TB")
-
-- name: Adjust VM Datacenter if UAT
-  set_fact: vcenter_datacenter="ACD_UCS"
-  when: (aci_bd_name[0:3] == "UF") or (aci_bd_name[0:3] == "UB")
+- name: Set VM Datacenter
+  {% if aci_bd_name[0:3] == 'UF' -%}
+    vcenter_datacenter="ADC-DVPP02"
+  {% elfi aci_bd_name[0:3] == 'UB' -%}
+    vcenter_datacenter="ADC-DVPP02"
+  {% elif aci_bd_name[0:3] == 'TF' -%}
+    vcenter_datacenter="ADC-UCS"
+  {% elif aci_bd_name[0:3] == 'TB' -%}
+    vcenter_datacenter="ADC-UCS"
+  {% else -%}
+    vcenter_datacenter="DAT02-PPUCS-005"
+  {%- endif %
 
 # Execute the specific OS action playbook
 - name: "Execute Configure ACI"
