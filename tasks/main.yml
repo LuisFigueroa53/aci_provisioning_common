@@ -56,7 +56,7 @@
   set_fact: vcenter_datacenter="ADC-UCS"
   when: (aci_bd_name[0:2] == "TF") or (aci_bd_name[0:2] == "TB")
 - name: Adjust VM Datacenter if UAT
-  set_fact: vcenter_datacenter="ACD_UCS"
+  set_fact: vcenter_datacenter="ADC_DVPP02"
   when: (aci_bd_name[0:2] == "UF") or (aci_bd_name[0:2] == "UB")
 - name: Adjust VM Datacenter if DV or PP
   set_fact: vcenter_datacenter="DAT02-PPUCS-005"
