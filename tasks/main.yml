@@ -48,13 +48,13 @@
   set_fact: vcenter_datacenter="VCSELABATL-NetEng"
 - name: Adjust VM Datacenter if Prod
   set_fact: vcenter_datacenter="ADC-UCS"
-  when: (aci_bd_name[0:3] == "TF") or (aci_bd_name[0:3] == "TB")
+  when: (aci_bd_name[0:2] == "TF") or (aci_bd_name[0:2] == "TB")
 - name: Adjust VM Datacenter if UAT
   set_fact: vcenter_datacenter="ACD_UCS"
-  when: (aci_bd_name[0:3] == "UF") or (aci_bd_name[0:3] == "UB")
+  when: (aci_bd_name[0:2] == "UF") or (aci_bd_name[0:2] == "UB")
 - name: Adjust VM Datacenter if DV or PP
   set_fact: vcenter_datacenter="DAT02-PPUCS-005"
-  when: (aci_bd_name[0:3] == "DF") or (aci_bd_name[0:3] == "DB") or (aci_bd_name[0:3] == "CF") or (aci_bd_name[0:3] == "CB")
+  when: (aci_bd_name[0:2] == "DF") or (aci_bd_name[0:2] == "DB") or (aci_bd_name[0:2] == "CF") or (aci_bd_name[0:2] == "CB")
 
 # Execute the specific OS action playbook
 - name: "Execute Configure ACI"
