@@ -49,11 +49,11 @@
 
 - name: Adjust VM Datacenter if Prod
   set_fact: vcenter_datacenter="ADC-UCS"
-  when (aci_bd_name | substring(0,3) == "TF") or (aci_bd_name | substring(0,3) == "TB")
+  when: (aci_bd_name | substring(0,3) == "TF") or (aci_bd_name | substring(0,3) == "TB")
 
 - name: Adjust VM Datacenter if UAT
   set_fact: vcenter_datacenter="ACD_UCS"
-  when (aci_bd_name | substring(0,3) == "UF") or (aci_bd_name | substring(0,3) == "UB")
+  when: (aci_bd_name | substring(0,3) == "UF") or (aci_bd_name | substring(0,3) == "UB")
 
 # Execute the specific OS action playbook
 - name: "Execute Configure ACI"
