@@ -43,6 +43,12 @@
 - name: Adjust VRF name if DevLab
   set_fact: aci_vrf_name="DV"
   when: (aci_vrf_name == "DF") or (aci_vrf_name == "DB")
+- name: Adjust VRF name if UF
+  set_fact: aci_vrf_name="CF"
+  when: aci_vrf_name == "UF"
+- name: Adjust VRF name if UB
+  set_fact: aci_vrf_name="CB"
+  when: aci_vrf_name == "UB"
 
 - name: Set Default VM Datacenter to Certlab
   set_fact: vcenter_datacenter="VCSELABATL-NetEng"
