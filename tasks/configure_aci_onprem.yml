@@ -1,5 +1,7 @@
 ---
 
+- debug: var=aci_password
+
 - name: Validate Tenant -- {{ aci_tn_name }}
   aci_tenant:
     validate_certs: false
