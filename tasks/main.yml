@@ -34,7 +34,7 @@
   
 - name: Fail on bad BD name - test 2
   fail: msg="Bad aci_bd_name - should be <vrv>-<ap>_<workload> - for this label -- name provided was {{ aci_bd_name }}"
-  when: (aci_epg_name is match "(F-AGENCY_ENGW|AGENCY_IMPS|B-ENT-(DATAHUB|MESB|WESB|SQL)|B-FARESHOP-(TAAS|EPRC|ECRT|EBURST|NGGF|SPLASH)|INFRA_NAS)" and (aci_bd_name is not match "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_epg_name.split('_')[1] }}"
+  when: (("ENGW" in aci_epg_name) or ("IMPS" in aci_epg_name) or ("DATAHUB" in aci_epg_name) or ("MESB" in aci_epg_name) or ("WESB" in aci_epg_name) or ("SQL" in aci_epg_name) or ("DB" in aci_epg_name) or ("TAAS" in aci_epg_name) or ("EPRC" in aci_epg_name) or ("ECRT" in aci_epg_name) or ("EBURST" in aci_epg_name) or ("NGGF" in aci_epg_name) or ("SPLASH" in aci_epg_name) or ("NAS" in aci_epg_name)) and (aci_bd_name is not match "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_epg_name.split('_')[1] }}")
 
 - name: Set Complex
   set_fact: 
