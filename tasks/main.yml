@@ -126,6 +126,7 @@
     path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vcenter_datacenter }}")
   delegate_to: localhost
   register: out
+  when: (vcenter_datacenter != "") and (vcenter_datacenter is defined)
 
 - name: Fail on Non-Existant vCenter Domain if requested
   fail: msg="vCenter Domain does not exist - {{ aci_hostname }} / {{ vcenter_datacenter }} "
