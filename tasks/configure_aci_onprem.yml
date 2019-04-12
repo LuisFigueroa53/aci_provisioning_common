@@ -2,84 +2,6 @@
 
 #- debug: var=aci_password
 
-- name: Validate Tenant -- {{ aci_tn_name }}
-  aci_tenant:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    state: query
-  delegate_to: localhost
-  register: out
-
-- name: Fail on Bad Tenant
-  fail: msg="Invalid Tenant - {{ aci_tn_name }} "
-  when: out['current'][0] is not defined
-
-- name: Validate AP -- {{ aci_ap_name }}
-  aci_ap:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    ap: "{{ aci_ap_name }}"
-    state: query
-  delegate_to: localhost
-  register: out
-
-- name: Fail on Bad AP
-  fail: msg="Invalid AP - {{ aci_ap_name }} "
-  when: out['current'][0] is not defined
-
-- name: Validate Bridge Domain -- {{ aci_bd_name }}
-  aci_bd:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    bd: "{{ aci_bd_name }}"
-    state: query
-  delegate_to: localhost
-  register: out
-
-- name: Fail on Bad BD
-  fail: msg="Invalid Bridge Domain - {{ aci_bd_name }} "
-  when: out['current'][0] is not defined
-
-- name: Validate VRF -- {{ aci_vrf_name }}
-  aci_vrf:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    vrf: "{{ aci_vrf_name }}"
-    state: query
-  delegate_to: localhost
-  register: out
-
-- name: Fail on Bad VRF
-  fail: msg="Invalid VRF - {{ aci_vrf_name }} "
-  when: out['current'][0] is not defined
-
-- name: Validate vCenter -- {{ vcenter_datacenter }}
-  aci_rest:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    method: get
-    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vcenter_datacenter }}")
-  delegate_to: localhost
-  register: out
-
-- name: Fail on Bad vCenter Datacenter
-  fail: msg="Invalid vCenter Domain - {{ vcenter_datacenter }} "
-  when: out['imdata'][0] is not defined
-  
 - name: Create EPG -- {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
   aci_epg:
     validate_certs: false
@@ -92,7 +14,24 @@
     bd: "{{ aci_bd_name }}"
   delegate_to: localhost
 
-- name: Add Subject Labels to EPG
+- name: Add Preferred Group unless PCI EPG
+  aci_rest:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    method: post
+    path: /api/mo/uni.xml
+    content:
+      <fvTenant name="{{ aci_tn_name }}">
+        <fvAp name="{{ aci_ap_name }}">
+          <fvAEPg name="{{ aci_epg_name }}" prefGrMemb="include" />
+        </fvAp>
+      </fvTenant>
+  delegate_to: localhost
+  when: aci_pci_epg == 0
+
+- name: Add Subject Labels to EPG if PCI EPG
   aci_rest:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -110,8 +49,9 @@
         </fvAp>
       </fvTenant>
   delegate_to: localhost
+  when: aci_pci_epg == 1
 
-- name: Add permitAny Contracts to EPG
+- name: Add permitAny Contracts to EPG if PCI EPG
   aci_epg_to_contract:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -126,8 +66,9 @@
     - consumer
     - provider
   delegate_to: localhost
+  when: aci_pci_epg == 1
 
-- name: Add VMWare domain -- {{ vcenter_datacenter }}
+- name: Add VMWare domain if requested -- {{ vcenter_datacenter }}
   aci_epg_to_domain:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -140,3 +81,6 @@
     vm_provider: vmware
     domain: "{{ vcenter_datacenter }}"
   delegate_to: localhost
+  when: vcenter_datacenter is defined
+  
+  
