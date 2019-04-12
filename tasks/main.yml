@@ -1,8 +1,12 @@
 ---
 
+- name: Fail on missing aci_vlan_name
+  fail: msg="aci_vlan_name not defined"
+  when: (aci_vlan_name == "") or (aci_vlan_name is not defined)
+
 - name: Fail on bad aci_vlan_name name format
-  fail: msg="Bad format for aci_vlan_name - should be <tn>|<ap>|<vrf>_<workload> -- name provided was {{ aci_vlan_name }}"
-  when: aci_vlan_name is not match "\w+\|\w+\|\w{2}_\w+"
+  fail: msg="Bad format for aci_vlan_name - should be <TN>|<AP>|<VRF>_<WORKLOAD> -- name provided was {{ aci_vlan_name }}"
+  when: aci_vlan_name is not match "(T5)?(CL|DV|Test|Prod)\|[A-Z]+\|[CDTU][FB]_[A-Z0-9\-]+"
 
 - name: Set TN, AP, EPG, Complex Vars
   set_fact:
@@ -10,61 +14,123 @@
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] | trim }}"
     aci_epg_name: "{{ aci_vlan_name.split('|')[2] | trim }}"
 
-- name: Fail on missing TN
-  fail: msg="Tenant name was blank in aci_vlan_name -- {{ aci_vlan_name }}"
-  when: (aci_tn_name[0] == "") or (aci_tn_name[0] is not defined)
+- name: Update tenant for T5
+  set_fact: 
+    aci_tn_name: "{{ aci_tn_name[2:] }}"
+  when: aci_tn_name is match "^T5"  
 
-- name: Fail on missing AP
-  fail: msg="Application Profile name was blank in aci_vlan_name -- {{ aci_vlan_name }}"
-  when: (aci_ap_name[1] == "") or (aci_ap_name[1] is not defined)
+- name: Set APIC Controller
+  set_fact:
+    aci_hostname: "{% if aci_tn_name == 'CL' %}CL-APIC-HD3-1{% elif aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% else %}TP-APIC-HD3-1{% endif %}.tvlport.net"
 
-- name: Fail on missing EPG
-  fail: msg="EPG name was blank in aci_vlan_name -- {{ aci_vlan_name }}"
-  when: (aci_epg_name[2] == "") or (aci_epg_name[2] is not defined)
-
-- name: Set APIC Controller default to CertLab
-  set_fact: aci_hostname="CL-APIC-HD1-1.tvlport.net"
-
-- name: Update APIC Controller if not CertLab
-  set_fact: aci_hostname="TP-APIC-HD3-1.tvlport.net"
-  when: (aci_tn_name == "Prod") or (aci_tn_name == "Test") or (aci_tn_name == "DV")
-
-- name: Set Default BD domain if not provided
-  set_fact: aci_bd_name="{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}"
+- name: Set Default BD if not provided
+  set_fact: 
+    aci_bd_name: "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}"
   when: (aci_bd_name == "") or (aci_bd_name is not defined)
 
-- name: Fail on bad BD name
+- name: Fail on bad BD name - test 1
   fail: msg="Bad format for aci_bd_name - should be <vrf>-<ap> -- name provided was {{ aci_bd_name }}"
   when: aci_bd_name is not match "\w{2}-\w+"
   
-- name: Set VRF and Complex
+- name: Fail on bad BD name - test 2
+  fail: msg="Bad aci_bd_name - should be <vrv>-<ap>_<workload> - for this label -- name provided was {{ aci_bd_name }}"
+  when: (aci_epg_name is match "(F-AGENCY_ENGW|AGENCY_IMPS|B-ENT-(DATAHUB|MESB|WESB|SQL)|B-FARESHOP-(TAAS|EPRC|ECRT|EBURST|NGGF|SPLASH)|INFRA_NAS)" and (aci_bd_name is not match "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_epg_name.split('_')[1] }}"
+
+- name: Set Complex
   set_fact: 
-    aci_complex="{{ aci_bd_name.split('-')[0] | trim }}"
-    aci_vrf_name="{{ aci_bd_name.split('-')[0] | trim }}"
+    aci_complex: "{{ aci_bd_name.split('-')[0] | trim }}"
 
-- name: Adjust VRF name if DevLab
-  set_fact: aci_vrf_name="DV"
-  when: (aci_vrf_name == "DF") or (aci_vrf_name == "DB")
-- name: Adjust VRF name if UF
-  set_fact: aci_vrf_name="CF"
-  when: aci_vrf_name == "UF"
-- name: Adjust VRF name if UB
-  set_fact: aci_vrf_name="CB"
-  when: aci_vrf_name == "UB"
+- name: Set VRF
+  set_fact: 
+    aci_vrf_name: "{% if aci_complex is match '^D[FB]' %}DV{% elif aci_complex is match '^[CU]F' %}CF{%  elif aci_complex is match '^[CU]B' %}CB{% else %}{{ aci_complex }}{% endif %}"
 
-- name: Set Default VM Datacenter to Certlab
-  set_fact: vcenter_datacenter="VCSELABATL-NetEng"
-- name: Adjust VM Datacenter if Prod
-  set_fact: vcenter_datacenter="ADC-UCS"
-  when: (aci_complex == "TF") or (aci_complex == "TB")
-- name: Adjust VM Datacenter if UAT
-  set_fact: vcenter_datacenter="ADC-DVPP02"
-  when: (aci_complex == "UF") or (aci_complex == "UB")
-- name: Adjust VM Datacenter if DV or PP
-  set_fact: vcenter_datacenter="DAT02-PPUCS-005"
-  when: (aci_complex == "DF") or (aci_complex == "DB") or (aci_complex == "CF") or (aci_complex == "CB")
+- name: Set Default PCI flag if not defined
+  set_fact:
+    aci_pci_epg: 0
+  when: (aci_pci_epg == "") or (aci_pci_epg is not defined)
 
-# Execute the specific OS action playbook
-- name: "Execute Configure ACI"
-  include_tasks: configure_aci_onprem.yml
-#
+- name: Fail on bad PCI flag
+  fail: msg="Bad aci_pci_epg - should be 0 or 1 -- value provided was {{ aci_pci_epg }}"
+  when: (aci_pci_epg != 0) and (aci_pci_epg != 1)
+
+- name: Validate Tenant exists -- {{ aci_tn_name }}
+  aci_tenant:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- name: Fail on Non-Existant Tenant
+  fail: msg="Tenant does not exist - {{ aci_hostname }} / {{ aci_tn_name }} "
+  when: (out['current'][0] == "") or (out['current'][0] is not defined)
+
+- name: Validate AP exists -- {{ aci_ap_name }}
+  aci_ap:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- name: Fail on Non-Existant AP
+  fail: msg="AP does not exist - {{ aci_hostname }} / {{ aci_ap_name }} "
+  when: (out['current'][0] == "" ) or (out['current'][0] is not defined)
+
+- name: Validate Bridge Domain exists -- {{ aci_bd_name }}
+  aci_bd:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    bd: "{{ aci_bd_name }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- name: Fail on Non-Existant BD
+  fail: msg="Bridge Domain does not exist - {{ aci_hostname }} / {{ aci_bd_name }} "
+  when: out['current'][0] is not defined
+
+- name: Validate VRF exists -- {{ aci_vrf_name }}
+  aci_vrf:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    vrf: "{{ aci_vrf_name }}"
+    state: query
+  delegate_to: localhost
+  register: out
+
+- name: Fail on Non-Existant VRF
+  fail: msg="VRF does not exist - {{ aci_hostname }} / {{ aci_vrf_name }} "
+  when: out['current'][0] is not defined
+
+- name: Verify vCenter Domain exists if requested -- {{ vcenter_datacenter }}
+  aci_rest:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    method: get
+    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vcenter_datacenter }}")
+  delegate_to: localhost
+  register: out
+
+- name: Fail on Non-Existant vCenter Domain if requested
+  fail: msg="vCenter Domain does not exist - {{ aci_hostname }} / {{ vcenter_datacenter }} "
+  when: (vcenter_datacenter != "") and (vcenter_datacenter is defined) and (out['imdata'][0] is not defined)
+
+- name: Run EPG job
+  include_tasks:
+    configure_aci_onprem.yml
