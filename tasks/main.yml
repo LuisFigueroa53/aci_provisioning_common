@@ -6,7 +6,7 @@
 
 - name: Fail on bad aci_vlan_name name format
   fail: msg="Bad format for aci_vlan_name - should be <TN>|<AP>|<VRF>_<WORKLOAD> -- name provided was {{ aci_vlan_name }}"
-  when: aci_vlan_name is not match "(T5)?(CL|DV|Test|Prod)\|[A-Z]+\|[CDTU][FB]_[A-Z0-9\-]+"
+  when: aci_vlan_name is not match "(T5)?(CL|DV|Test|Prod)\|[A-Z]+\|([CDTU][FB]|CL)_[A-Z0-9\-]+"
 
 - name: Set TN, AP, EPG, Complex Vars
   set_fact:
