@@ -68,7 +68,7 @@
   delegate_to: localhost
   when: aci_pci_epg == 1
 
-- name: Add VMWare domain if requested -- {{ vcenter_datacenter }}
+- name: Add VMWare domain if requested -- {{ vmware_datacenter }}
   aci_epg_to_domain:
     validate_certs: false
     host: "{{ aci_hostname }}"
@@ -79,8 +79,8 @@
     epg: "{{ aci_epg_name }}"
     domain_type: vmm
     vm_provider: vmware
-    domain: "{{ vcenter_datacenter }}"
+    domain: "{{ vmware_datacenter }}"
   delegate_to: localhost
-  when: vcenter_datacenter is defined
+  when: vmware_datacenter is defined
   
   

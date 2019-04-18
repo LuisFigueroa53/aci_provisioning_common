@@ -116,21 +116,21 @@
   fail: msg="VRF does not exist - {{ aci_hostname }} / {{ aci_vrf_name }} "
   when: out['current'][0] is not defined
 
-- name: Verify vCenter Domain exists if requested -- {{ vcenter_datacenter }}
+- name: Verify vCenter Domain exists if requested -- {{ vmware_datacenter }}
   aci_rest:
     validate_certs: false
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
     method: get
-    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vcenter_datacenter }}")
+    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vmware_datacenter }}")
   delegate_to: localhost
   register: out
-  when: (vcenter_datacenter != "") and (vcenter_datacenter is defined)
+  when: (vmware_datacenter != "") and (vmware_datacenter is defined)
 
 - name: Fail on Non-Existant vCenter Domain if requested
-  fail: msg="vCenter Domain does not exist - {{ aci_hostname }} / {{ vcenter_datacenter }} "
-  when: (vcenter_datacenter != "") and (vcenter_datacenter is defined) and (out['imdata'][0] is not defined)
+  fail: msg="vCenter Domain does not exist - {{ aci_hostname }} / {{ vmware_datacenter }} "
+  when: (vmware_datacenter != "") and (vmware_datacenter is defined) and (out['imdata'][0] is not defined)
 
 - name: Run EPG job
   include_tasks:
