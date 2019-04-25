@@ -8,42 +8,49 @@
   fail: msg="Bad format for aci_vlan_name - should be <TN>|<AP>|<VRF>_<WORKLOAD> -- name provided was {{ aci_vlan_name }}"
   when: aci_vlan_name is not match "(T5)?(CL|DV|Test|Prod)\|[A-Z]+\|([CDTU][FB]|CL)_[A-Z0-9\-]+"
 
-- name: Set TN, AP, EPG, Complex Vars
+- name: Set TN, AP, EPG, VRF, Work vars
   set_fact:
     aci_tn_name: "{{ aci_vlan_name.split('|')[0] | trim }}"
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] | trim }}"
     aci_epg_name: "{{ aci_vlan_name.split('|')[2] | trim }}"
-    aci_app_name: "{{ aci_vlan_name.split('_')[1] | trim }}"
+    aci_vrf_name: "{{ aci_epg_name.split('_')[0] | trim }}"
+    aci_work_name: "{{ aci_epg_name.split('_')[1] | trim }}"
+
+- name: Set APIC Controller
+  set_fact:
+    aci_hostname: "{% if aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% elif aci_tn_name is match '(Prod|Test|DV)' %}TP-APIC-HD3-1{% else %}CL-APIC-HD1-1{% endif %}.tvlport.net"
+
+- name: Update VRF for DV or UAT
+  set_fact: 
+    aci_vrf_name: "{% if aci_vrf is match '^D[FB]' %}DV{% elif aci_vrf == 'UF' %}CF{%  elif aci_vrf == 'UB' %}CB{% endif %}"
 
 - name: Update tenant for T5
   set_fact: 
     aci_tn_name: "{{ aci_tn_name[2:] }}"
   when: aci_tn_name is match "^T5"  
 
-- name: Set APIC Controller
+- name: Set Default BD name if not provided (1)
   set_fact:
-    aci_hostname: "{% if aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% elif aci_tn_name is match '(Prod|Test|DV)' %}TP-APIC-HD3-1{% else %}CL-APIC-HD1-1{% endif %}.tvlport.net"
+    aci_bd_name: "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}-SQL"
+  when: (("SQL" in aci_app_name) or ("DB" in aci_app_name)) and ((aci_bd_name == "") or (aci_bd_name is not defined))
 
-- name: Set Default BD if not provided
+-name: Set Default BD name if not provided (2)
+  set_fact:
+    aci_bd_name: "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_work_name }}"
+  when: (("ENGW" in aci_app_name) or ("IMPS" in aci_app_name) or ("DATAHUB" in aci_app_name) or ("MESB" in aci_app_name) or ("WESB" in aci_app_name) or ("TAAS" in aci_app_name) or ("EPRC" in aci_app_name) or ("ECRT" in aci_app_name) or ("EBURST" in aci_app_name) or ("NGGF" in aci_app_name) or ("SPLASH" in aci_app_name) or ("NAS" in aci_epg_name)) and ((aci_bd_name == "") or (aci_bd_name is not defined))
+
+- name: Set Default BD if not provided (3)
   set_fact: 
     aci_bd_name: "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}"
   when: (aci_bd_name == "") or (aci_bd_name is not defined)
 
-- name: Fail on bad BD name - test 1
-  fail: msg="Bad format for aci_bd_name - should be <vrf>-<ap> -- name provided was {{ aci_bd_name }}"
-  when: aci_bd_name is not match "\w{2}-\w+"
-  
-- name: Fail on bad BD name - test 2
-  fail: msg="Bad aci_bd_name - should be <vrv>-<ap>_<workload> - for this label -- name provided was {{ aci_bd_name }}"
-  when: (("ENGW" in aci_app_name) or ("IMPS" in aci_app_name) or ("DATAHUB" in aci_app_name) or ("MESB" in aci_app_name) or ("WESB" in aci_app_name) or ("SQL" in aci_app_name) or ("DB" in aci_app_name) or ("TAAS" in aci_app_name) or ("EPRC" in aci_app_name) or ("ECRT" in aci_app_name) or ("EBURST" in aci_app_name) or ("NGGF" in aci_app_name) or ("SPLASH" in aci_app_name) or ("NAS" in aci_epg_name)) and (aci_bd_name is not match "aci_epg_name.split('_')[0]-aci_ap_name_aci_epg_name.split('_')[1]")
+- name: Fail on bad BD name (1)
+  fail: msg="Bad BD name - should be <VRF>-<AP>_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
+  when: (("SQL" in aci_app_name) or ("DB" in aci_app_name)) and (aci_bd_name is not match "^aci_epg_name.split('_')[0]-aci_ap_name_SQL$")
 
-- name: Set Complex
-  set_fact: 
-    aci_complex: "{{ aci_bd_name.split('-')[0] | trim }}"
-
-- name: Set VRF
-  set_fact: 
-    aci_vrf_name: "{% if aci_complex is match '^D[FB]' %}DV{% elif aci_complex is match '^[CU]F' %}CF{%  elif aci_complex is match '^[CU]B' %}CB{% else %}{{ aci_complex }}{% endif %}"
+- name: Fail on bad BD name (2)
+  fail: msg="Bad BD name - shold be <VRF>-<AP>_<WORKLOAD> for dedicated workloads -- name provided was {{ aci_bd_name }}"
+  when: (("ENGW" in aci_app_name) or ("IMPS" in aci_app_name) or ("DATAHUB" in aci_app_name) or ("MESB" in aci_app_name) or ("WESB" in aci_app_name) or ("TAAS" in aci_app_name) or ("EPRC" in aci_app_name) or ("ECRT" in aci_app_name) or ("EBURST" in aci_app_name) or ("NGGF" in aci_app_name) or ("SPLASH" in aci_app_name) or ("NAS" in aci_epg_name)) and ( aci_bd_name is not match "^aci_epg_name.split('_')[0]-aci_ap_name_aci_work_name$"   )
 
 - name: Set Default PCI flag if not defined
   set_fact:
@@ -69,21 +76,21 @@
   fail: msg="Tenant does not exist - {{ aci_hostname }} / {{ aci_tn_name }} "
   when: (out['current'][0] == "") or (out['current'][0] is not defined)
 
-- name: Validate AP exists -- {{ aci_ap_name }}
-  aci_ap:
+- name: Validate VRF exists -- {{ aci_vrf_name }}
+  aci_vrf:
     validate_certs: false
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
     tenant: "{{ aci_tn_name }}"
-    ap: "{{ aci_ap_name }}"
+    vrf: "{{ aci_vrf_name }}"
     state: query
   delegate_to: localhost
   register: out
 
-- name: Fail on Non-Existant AP
-  fail: msg="AP does not exist - {{ aci_hostname }} / {{ aci_ap_name }} "
-  when: (out['current'][0] == "" ) or (out['current'][0] is not defined)
+- name: Fail on Non-Existant VRF
+  fail: msg="VRF does not exist - {{ aci_hostname }} / {{ aci_vrf_name }} "
+  when: out['current'][0] is not defined
 
 - name: Validate Bridge Domain exists -- {{ aci_bd_name }}
   aci_bd:
@@ -101,23 +108,23 @@
   fail: msg="Bridge Domain does not exist - {{ aci_hostname }} / {{ aci_bd_name }} "
   when: out['current'][0] is not defined
 
-- name: Validate VRF exists -- {{ aci_vrf_name }}
-  aci_vrf:
+- name: Validate AP exists -- {{ aci_ap_name }}
+  aci_ap:
     validate_certs: false
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
     tenant: "{{ aci_tn_name }}"
-    vrf: "{{ aci_vrf_name }}"
+    ap: "{{ aci_ap_name }}"
     state: query
   delegate_to: localhost
   register: out
 
-- name: Fail on Non-Existant VRF
-  fail: msg="VRF does not exist - {{ aci_hostname }} / {{ aci_vrf_name }} "
-  when: out['current'][0] is not defined
+- name: Fail on Non-Existant AP
+  fail: msg="AP does not exist - {{ aci_hostname }} / {{ aci_ap_name }} "
+  when: (out['current'][0] == "" ) or (out['current'][0] is not defined)
 
-- name: Verify vCenter Domain exists if requested -- {{ vmware_datacenter }}
+- name: VeriValidate vCenter Domain exists if requested -- {{ vmware_datacenter }}
   aci_rest:
     validate_certs: false
     host: "{{ aci_hostname }}"
