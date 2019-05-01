@@ -25,7 +25,7 @@
 
 - name: Update VRF for DV or UAT
   set_fact: 
-    aci_vrf_name: "{% if aci_vrf is match '^D[FB]' %}DV{% elif aci_vrf == 'UF' %}CF{%  elif aci_vrf == 'UB' %}CB{% endif %}"
+    aci_vrf_name: "{% if aci_vrf_name is match '^D[FB]' %}DV{% elif aci_vrf_name == 'UF' %}CF{%  elif aci_vrf_name == 'UB' %}CB{% endif %}"
 
 - name: Update tenant for T5
   set_fact: 
