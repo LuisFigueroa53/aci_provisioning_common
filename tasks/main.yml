@@ -85,7 +85,7 @@
       ("SPLASH" in aci_epg_name) or 
       ("NAS" in aci_epg_name)
     ) and ( 
-      aci_bd_name is not match "^aci_epg_name.split('_')[0]-aci_ap_name_aci_work_name$"
+      aci_bd_name is not match "^{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_work_name }}$"
     )
 
 - name: Set Default PCI flag if not defined
