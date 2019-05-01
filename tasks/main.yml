@@ -15,6 +15,7 @@
     aci_epg_name: "{{ aci_vlan_name.split('|')[2] | trim }}"
 
 - name: Set VRF, Work vars
+  set_fact:
     aci_vrf_name: "{{ aci_epg_name.split('_')[0] | trim }}"
     aci_work_name: "{{ aci_epg_name.split('_')[1] | trim }}"
 
