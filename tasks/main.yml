@@ -8,7 +8,7 @@
   fail: msg="Bad format for aci_vlan_name - should be <TN>|<AP>|<VRF>_<WORKLOAD> -- name provided was {{ aci_vlan_name }}"
   when: aci_vlan_name is not match "(T5)?(CL|DV|Test|Prod)\|[A-Z]+\|([CDTU][FB]|CL)_[A-Z0-9\-]+"
 
-- name: Set TN, AP, EPG, VRF, Work
+- name: Set TN, AP, EPG vars
   set_fact:
     aci_tn_name: "{{ aci_vlan_name.split('|')[0] | trim }}"
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] | trim }}"
