@@ -158,7 +158,7 @@
 
 - name: Fail on Non-Existant AP
   fail: msg="AP does not exist - {{ aci_hostname }} / {{ aci_ap_name }} "
-  when: (out['current'][0] == "" ) or (out['current'][0] is not defined)
+  when: out['current'][0] is not defined
 
 - name: VeriValidate vCenter Domain exists if requested -- {{ vmware_datacenter }}
   aci_rest:
