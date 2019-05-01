@@ -40,7 +40,24 @@
 - name: Set Default BD name if not provided (2)
   set_fact:
     aci_bd_name: "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_work_name }}"
-  when: (("ENGW" in aci_epg_name) or ("IMPS" in aci_epg_name) or ("DATAHUB" in aci_epg_name) or ("MESB" in aci_epg_name) or ("WESB" in aci_epg_name) or ("TAAS" in aci_epg_name) or ("EPRC" in aci_epg_name) or ("ECRT" in aci_epg_name) or ("EBURST" in aci_epg_name) or ("NGGF" in aci_epg_name) or ("SPLASH" in aci_epg_name) or ("NAS" in aci_epg_name)) and ((aci_bd_name == "") or (aci_bd_name is not defined))
+  when: >
+    (
+      ("ENGW" in aci_epg_name) or 
+      ("IMPS" in aci_epg_name) or 
+      ("DATAHUB" in aci_epg_name) or 
+      ("MESB" in aci_epg_name) or 
+      ("WESB" in aci_epg_name) or 
+      ("TAAS" in aci_epg_name) or 
+      ("EPRC" in aci_epg_name) or 
+      ("ECRT" in aci_epg_name) or 
+      ("EBURST" in aci_epg_name) or 
+      ("NGGF" in aci_epg_name) or 
+      ("SPLASH" in aci_epg_name) or 
+      ("NAS" in aci_epg_name)
+    ) and (
+      (aci_bd_name == "") or 
+      (aci_bd_name is not defined)
+    )
 
 - name: Set Default BD if not provided (3)
   set_fact: 
@@ -52,8 +69,24 @@
   when: (("SQL" in aci_epg_name) or ("DB" in aci_epg_name)) and (aci_bd_name is not match "^aci_epg_name.split('_')[0]-aci_ap_name_SQL$")
 
 - name: Fail on bad BD name (2)
-  fail: msg="Bad BD name - shold be <VRF>-<AP>_<WORKLOAD> for dedicated workloads -- name provided was {{ aci_bd_name }}"
-  when: (("ENGW" in aci_epg_name) or ("IMPS" in aci_epg_name) or ("DATAHUB" in aci_epg_name) or ("MESB" in aci_epg_name) or ("WESB" in aci_epg_name) or ("TAAS" in aci_epg_name) or ("EPRC" in aci_epg_name) or ("ECRT" in aci_epg_name) or ("EBURST" in aci_epg_name) or ("NGGF" in aci_epg_name) or ("SPLASH" in aci_epg_name) or ("NAS" in aci_epg_name)) and ( aci_bd_name is not match "^aci_epg_name.split('_')[0]-aci_ap_name_aci_work_name$"   )
+  fail: msg="Bad BD name - shold be <VRF>-<AP>_<WORKLOAD> for dedicated workloads -- name provided was {{ aci_bd_name }}.  Should be aci_epg_name.split('_')[0]-aci_ap_name_aci_work_name"
+  when: > 
+    (
+      ("ENGW" in aci_epg_name) or 
+      ("IMPS" in aci_epg_name) or 
+      ("DATAHUB" in aci_epg_name) or 
+      ("MESB" in aci_epg_name) or 
+      ("WESB" in aci_epg_name) or 
+      ("TAAS" in aci_epg_name) or 
+      ("EPRC" in aci_epg_name) or 
+      ("ECRT" in aci_epg_name) or 
+      ("EBURST" in aci_epg_name) or 
+      ("NGGF" in aci_epg_name) or 
+      ("SPLASH" in aci_epg_name) or 
+      ("NAS" in aci_epg_name)
+    ) and ( 
+      aci_bd_name is not match "^aci_epg_name.split('_')[0]-aci_ap_name_aci_work_name$"
+    )
 
 - name: Set Default PCI flag if not defined
   set_fact:
