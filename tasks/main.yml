@@ -14,9 +14,6 @@
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] | trim }}"
     aci_epg_name: "{{ aci_vlan_name.split('|')[2] | trim }}"
 
-- name: Test1
-  fail: msg="aci_epg_name = {{aci_epg_name}}"
-
 - name: Set VRF, Work vars
   set_fact:
     aci_vrf_name: "{{ aci_epg_name.split('_')[0] | trim }}"
@@ -37,26 +34,26 @@
 
 - name: Set Default BD name if not provided (1)
   set_fact:
-    aci_bd_name: "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}-SQL"
-  when: (("SQL" in aci_epg_name) or ("DB" in aci_epg_name)) and ((aci_bd_name == "") or (aci_bd_name is not defined))
+    aci_bd_name: "{{ aci_vrf_name }}-{{ aci_ap_name }}_SQL"
+  when: (("SQL" in aci_work_name) or ("DB" in aci_work_name)) and ((aci_bd_name == "") or (aci_bd_name is not defined))
 
 - name: Set Default BD name if not provided (2)
   set_fact:
-    aci_bd_name: "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_work_name }}"
+    aci_bd_name: "{{ aci_vrf_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
   when: >
     (
-      ("ENGW" in aci_epg_name) or 
-      ("IMPS" in aci_epg_name) or 
-      ("DATAHUB" in aci_epg_name) or 
-      ("MESB" in aci_epg_name) or 
-      ("WESB" in aci_epg_name) or 
-      ("TAAS" in aci_epg_name) or 
-      ("EPRC" in aci_epg_name) or 
-      ("ECRT" in aci_epg_name) or 
-      ("EBURST" in aci_epg_name) or 
-      ("NGGF" in aci_epg_name) or 
-      ("SPLASH" in aci_epg_name) or 
-      ("NAS" in aci_epg_name)
+      ("ENGW" in aci_work_name) or 
+      ("IMPS" in aci_work_name) or 
+      ("DATAHUB" in aci_work_name) or 
+      ("MESB" in aci_work_name) or 
+      ("WESB" in aci_work_name) or 
+      ("TAAS" in aci_work_name) or 
+      ("EPRC" in aci_work_name) or 
+      ("ECRT" in aci_work_name) or 
+      ("EBURST" in aci_work_name) or 
+      ("NGGF" in aci_work_name) or 
+      ("SPLASH" in aci_work_name) or 
+      ("NAS" in aci_work_name)
     ) and (
       (aci_bd_name == "") or 
       (aci_bd_name is not defined)
@@ -64,31 +61,31 @@
 
 - name: Set Default BD if not provided (3)
   set_fact: 
-    aci_bd_name: "{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}"
+    aci_bd_name: "{{ aci_vrf_name }}-{{ aci_ap_name }}"
   when: (aci_bd_name == "") or (aci_bd_name is not defined)
 
 - name: Fail on bad BD name (1)
   fail: msg="Bad BD name - should be <VRF>-<AP>_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
-  when: (("SQL" in aci_epg_name) or ("DB" in aci_epg_name)) and (aci_bd_name is not match "^aci_epg_name.split('_')[0]-aci_ap_name_SQL$")
+  when: (("SQL" in aci_work_name) or ("DB" in aci_work_name)) and (aci_bd_name is not match "^aci_vrf_name-aci_ap_name_SQL$")
 
 - name: Fail on bad BD name (2)
-  fail: msg="Bad BD name.  Should be {{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
+  fail: msg="Bad BD name.  Should be {{ aci_vrf_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
   when: > 
     (
-      ("ENGW" in aci_epg_name) or 
-      ("IMPS" in aci_epg_name) or 
-      ("DATAHUB" in aci_epg_name) or 
-      ("MESB" in aci_epg_name) or 
-      ("WESB" in aci_epg_name) or 
-      ("TAAS" in aci_epg_name) or 
-      ("EPRC" in aci_epg_name) or 
-      ("ECRT" in aci_epg_name) or 
-      ("EBURST" in aci_epg_name) or 
-      ("NGGF" in aci_epg_name) or 
-      ("SPLASH" in aci_epg_name) or 
-      ("NAS" in aci_epg_name)
+      ("ENGW" in aci_work_name) or 
+      ("IMPS" in aci_work_name) or 
+      ("DATAHUB" in aci_work_name) or 
+      ("MESB" in aci_work_name) or 
+      ("WESB" in aci_work_name) or 
+      ("TAAS" in aci_work_name) or 
+      ("EPRC" in aci_work_name) or 
+      ("ECRT" in aci_work_name) or 
+      ("EBURST" in aci_work_name) or 
+      ("NGGF" in aci_work_name) or 
+      ("SPLASH" in aci_work_name) or 
+      ("NAS" in aci_work_name)
     ) and ( 
-      aci_bd_name is not match "^{{ aci_epg_name.split('_')[0] }}-{{ aci_ap_name }}_{{ aci_work_name }}$"
+      aci_bd_name is not match "^{{ aci_vrf_name }}-{{ aci_ap_name }}_{{ aci_work_name }}$"
     )
 
 - name: Set Default PCI flag if not defined
