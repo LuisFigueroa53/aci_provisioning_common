@@ -14,6 +14,9 @@
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] | trim }}"
     aci_epg_name: "{{ aci_vlan_name.split('|')[2] | trim }}"
 
+- name: Test1
+  fail: msg="aci_epg_name = {{aci_epg_name}}"
+
 - name: Set VRF, Work vars
   set_fact:
     aci_vrf_name: "{{ aci_epg_name.split('_')[0] | trim }}"
