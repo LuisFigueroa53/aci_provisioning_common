@@ -16,16 +16,12 @@
 
 - name: Set VRF, Work vars
   set_fact:
-    aci_vrf_name: "{{ aci_epg_name.split('_')[0] | trim }}"
+    aci_complex_name: "{{ aci_epg_name.split('_')[0] | trim }}"
     aci_work_name: "{{ aci_epg_name.split('_')[1] | trim }}"
 
 - name: Set APIC Controller
   set_fact:
     aci_hostname: "{% if aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% elif aci_tn_name is match '(Prod|Test|DV)' %}TP-APIC-HD3-1{% else %}CL-APIC-HD1-1{% endif %}.tvlport.net"
-
-- name: Update VRF for DV or UAT
-  set_fact: 
-    aci_vrf_name: "{% if aci_vrf_name is match '^D[FB]' %}DV{% elif aci_vrf_name == 'UF' %}CF{%  elif aci_vrf_name == 'UB' %}CB{% else %}{{ aci_vrf_name }}{% endif %}"
 
 - name: Update tenant for T5
   set_fact: 
@@ -34,12 +30,12 @@
 
 - name: Set Default BD name if not provided (1)
   set_fact:
-    aci_bd_name: "{{ aci_vrf_name }}-{{ aci_ap_name }}_SQL"
+    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_SQL"
   when: (("SQL" in aci_work_name) or ("DB" in aci_work_name)) and ((aci_bd_name == "") or (aci_bd_name is not defined))
 
 - name: Set Default BD name if not provided (2)
   set_fact:
-    aci_bd_name: "{{ aci_vrf_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
+    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
   when: >
     (
       ("ENGW" in aci_work_name) or 
@@ -61,15 +57,15 @@
 
 - name: Set Default BD if not provided (3)
   set_fact: 
-    aci_bd_name: "{{ aci_vrf_name }}-{{ aci_ap_name }}"
+    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}"
   when: (aci_bd_name == "") or (aci_bd_name is not defined)
 
 - name: Fail on bad BD name (1)
   fail: msg="Bad BD name - should be <VRF>-<AP>_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
-  when: (("SQL" in aci_work_name) or ("DB" in aci_work_name)) and (aci_bd_name is not match "^aci_vrf_name-aci_ap_name_SQL$")
+  when: (("SQL" in aci_work_name) or ("DB" in aci_work_name)) and (aci_bd_name is not match "^aci_complex_name-aci_ap_name_SQL$")
 
 - name: Fail on bad BD name (2)
-  fail: msg="Bad BD name.  Should be {{ aci_vrf_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
+  fail: msg="Bad BD name.  Should be {{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
   when: > 
     (
       ("ENGW" in aci_work_name) or 
@@ -85,7 +81,7 @@
       ("SPLASH" in aci_work_name) or 
       ("NAS" in aci_work_name)
     ) and ( 
-      aci_bd_name is not match "^{{ aci_vrf_name }}-{{ aci_ap_name }}_{{ aci_work_name }}$"
+      aci_bd_name is not match "^{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}$"
     )
 
 - name: Set Default PCI flag if not defined
@@ -112,20 +108,20 @@
   fail: msg="Tenant does not exist - {{ aci_hostname }} / {{ aci_tn_name }} "
   when: (out['current'][0] == "") or (out['current'][0] is not defined)
 
-- name: Validate VRF exists -- {{ aci_vrf_name }}
+- name: Validate VRF exists -- {{ aci_complex_name }}
   aci_vrf:
     validate_certs: false
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
     tenant: "{{ aci_tn_name }}"
-    vrf: "{{ aci_vrf_name }}"
+    vrf: "{{ aci_complex_name }}"
     state: query
   delegate_to: localhost
   register: out
 
 - name: Fail on Non-Existant VRF
-  fail: msg="VRF does not exist - {{ aci_hostname }} / {{ aci_vrf_name }} "
+  fail: msg="VRF does not exist - {{ aci_hostname }} / {{ aci_complex_name }} "
   when: out['current'][0] is not defined
 
 - name: Validate Bridge Domain exists -- {{ aci_bd_name }}
