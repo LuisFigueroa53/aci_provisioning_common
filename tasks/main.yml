@@ -14,10 +14,14 @@
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] | trim }}"
     aci_epg_name: "{{ aci_vlan_name.split('|')[2] | trim }}"
 
-- name: Set VRF, Work vars
+- name: Set Complex, Work vars
   set_fact:
     aci_complex_name: "{{ aci_epg_name.split('_')[0] | trim }}"
     aci_work_name: "{{ aci_epg_name.split('_')[1] | trim }}"
+
+- name: Set VRF var
+  set_fact:
+    aci_vrf_name: "{% if aci_complex_name is match 'D[FB]' %}DV{% elif aci_complex_name == 'UF' %}CF{% elif aci_complex_name == 'UB' %}CB{% else %}aci_complex_name{% endif %}"
 
 - name: Set APIC Controller
   set_fact:
@@ -108,20 +112,20 @@
   fail: msg="Tenant does not exist - {{ aci_hostname }} / {{ aci_tn_name }} "
   when: (out['current'][0] == "") or (out['current'][0] is not defined)
 
-- name: Validate VRF exists -- {{ aci_complex_name }}
+- name: Validate VRF exists -- {{ aci_vrf_name }}
   aci_vrf:
     validate_certs: false
     host: "{{ aci_hostname }}"
     username: "{{ aci_username }}"
     password: "{{ aci_password }}"
     tenant: "{{ aci_tn_name }}"
-    vrf: "{{ aci_complex_name }}"
+    vrf: "{{ aci_vrf_name }}"
     state: query
   delegate_to: localhost
   register: out
 
 - name: Fail on Non-Existant VRF
-  fail: msg="VRF does not exist - {{ aci_hostname }} / {{ aci_complex_name }} "
+  fail: msg="VRF does not exist - {{ aci_hostname }} / {{ aci_vrf_name }} "
   when: out['current'][0] is not defined
 
 - name: Validate Bridge Domain exists -- {{ aci_bd_name }}
