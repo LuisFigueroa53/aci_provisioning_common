@@ -31,43 +31,6 @@
   delegate_to: localhost
   when: aci_pci_epg == 0
 
-- name: Add Subject Labels to EPG if PCI EPG
-  aci_rest:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    method: post
-    path: /api/mo/uni.xml
-    content:
-      <fvTenant name="{{ aci_tn_name }}">
-        <fvAp name="{{ aci_ap_name }}">
-          <fvAEPg name="{{ aci_epg_name }}">
-            <vzProvSubjLbl name="{{ aci_vrf_name }}" tag="black" />
-            <vzConsSubjLbl name="{{ aci_vrf_name }}" tag="black" />
-          </fvAEPg>
-        </fvAp>
-      </fvTenant>
-  delegate_to: localhost
-  when: aci_pci_epg == 1
-
-- name: Add permitAny Contracts to EPG if PCI EPG
-  aci_epg_to_contract:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    ap: "{{ aci_ap_name }}"
-    epg: "{{ aci_epg_name }}"
-    contract: "permitAny-{{ aci_vrf_name }}"
-    contract_type: "{{ item }}"
-  with_items:
-    - consumer
-    - provider
-  delegate_to: localhost
-  when: aci_pci_epg == 1
-
 - name: Add VMWare domain if requested -- {{ vmware_datacenter }}
   aci_epg_to_domain:
     validate_certs: false
