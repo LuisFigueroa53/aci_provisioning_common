@@ -61,7 +61,7 @@
   when: (aci_bd_name == "") or (aci_bd_name is not defined)
 
 - name: Fail on bad BD name (1)
-  fail: msg="Bad BD name - should be <VRF>-<AP>_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
+  fail: msg="Bad BD name - should be <COMPLEX>-<AP>_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
   when: (("SQL" in aci_work_name) or ("DB" in aci_work_name)) and (aci_bd_name is not match "^aci_complex_name-aci_ap_name_SQL$")
 
 - name: Fail on bad BD name (2)
