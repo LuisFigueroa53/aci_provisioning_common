@@ -72,7 +72,7 @@
 
 
 - name: Debug BD Fail 2
-  debug: msg="work==={{ aci_ap_name}}=== / bd==={{ aci_work_name }}==="
+  debug: msg="work==={{ aci_ap_name}}=== / bd==={{ aci_bd_name }}=== / urlencode==={{ aci_bd_name|urlencode() }}==="
   
 
 - name: Fail on bad BD name (2)
