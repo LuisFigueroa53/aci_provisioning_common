@@ -33,12 +33,9 @@
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_SQL"
   when: >
     (
-      ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and
       (aci_ap_name == "ENT") and
-      (
-        ("SQL" in aci_work_name) or 
-        ("DB" in aci_work_name)
-      )
+      ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and
+      ( ("SQL" in aci_work_name) or ("DB" in aci_work_name) )
     )
 
 - name: Set Default BD name if not provided (2)
