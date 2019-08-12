@@ -5,7 +5,7 @@
   when: (aci_vlan_name == "") or (aci_vlan_name is not defined)
 
 - name: Fail on bad aci_vlan_name name format
-  fail: msg="Bad format for aci_vlan_name - should be <TN>|<AP>|<VRF>_<WORKLOAD> -- name provided was {{ aci_vlan_name }}"
+  fail: msg="Bad format for aci_vlan_name - should be TN|AP|VRF_WORKLOAD -- name provided was {{ aci_vlan_name }}"
   when: aci_vlan_name is not match "(T5)?(CL|DV|Test|Prod)\|[A-Z]+\|([CDTU][FB]|CL)_[A-Z0-9\-]+"
 
 - name: Set TN, AP, EPG vars
@@ -67,10 +67,10 @@
   when: (aci_bd_name == "") or (aci_bd_name is not defined)
 
 - name: Fail on bad BD name (1)
-  fail: msg="Bad BD name - should be <COMPLEX>-<AP>_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
+  fail: msg="Bad BD name - should be COMPLEX-AP_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
   when: >
     (aci_ap_name == "ENT") and
-    ( (aci_work_name is search("SQL")) or (aci_work_name is search("DB")) and
+    ( (aci_work_name is search("SQL")) or (aci_work_name is search("DB")) ) and
     (aci_bd_name is not regex "^aci_complex_name-aci_ap_name_SQL$")
 
 - name: Fail on bad BD name (2)
