@@ -28,6 +28,9 @@
     aci_tn_name: "{{ aci_tn_name[2:] }}"
   when: aci_tn_name is match "^T5"  
 
+- name: Debug Pre-Default 1
+  debug: msg="ap={{ aci_ap_name}} / work={{ aci_work_name }} "
+  
 - name: Set Default BD name if not provided (1)
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_SQL"
