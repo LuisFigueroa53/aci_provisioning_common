@@ -28,9 +28,6 @@
     aci_tn_name: "{{ aci_tn_name[2:] }}"
   when: aci_tn_name is match "^T5"  
 
-- name: Debug Pre-Default 1
-  debug: msg="ap={{ aci_ap_name}} / work={{ aci_work_name }} "
-  
 - name: Set Default BD name if not provided (1)
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_SQL"
@@ -73,6 +70,11 @@
     (aci_work_name is regex "(SQL|DB)$") and
     (aci_bd_name is not regex "^aci_complex_name-aci_ap_name_SQL$")
 
+
+- name: Debug BD Fail 2
+  debug: msg="work==={{ aci_ap_name}}=== / bd==={{ aci_work_name }}==="
+  
+
 - name: Fail on bad BD name (2)
   fail: msg="Bad BD name.  Should be {{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
   when: > 
@@ -90,7 +92,7 @@
       (aci_work_name is search("SPLASH")) or 
       (aci_work_name is search("NAS"))
     ) and ( 
-      aci_bd_name != aci_complex_name+"-"+aci_ap_name+"_"+aci_work_name"
+      aci_bd_name is not regex "^(aci_complex_name)-(aci_ap_name)_(aci_work_name)$"
     )
 
 - name: Set Default PCI flag if not defined
