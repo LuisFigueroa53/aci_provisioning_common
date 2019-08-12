@@ -19,9 +19,6 @@
     aci_complex_name: "{{ aci_epg_name.split('_')[0] | trim }}"
     aci_work_name: "{{ aci_epg_name.split('_')[1] | trim }}"
 
-- name: Debug testing
-  debug: msg="epg = {{ aci_epg_name}} / complex = {{ aci_complex_name }} / work = {{ aci_work_name }}"
-
 - name: Set APIC Controller
   set_fact:
     aci_hostname: "{% if aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% elif aci_tn_name is match '(Prod|Test|DV)' %}TP-APIC-HD3-1{% else %}CL-APIC-HD1-1{% endif %}.tvlport.net"
@@ -35,11 +32,9 @@
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_SQL"
   when: >
-    (
-      (aci_ap_name == "ENT") and
-      ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and
-      ( ("SQL" in aci_work_name) or ("DB" in aci_work_name) )
-    )
+    (aci_ap_name == "ENT") and
+    ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and
+    ( ("SQL" in aci_work_name) or ("DB" in aci_work_name) )
 
 - name: Set Default BD name if not provided (2)
   set_fact:
@@ -71,14 +66,9 @@
 - name: Fail on bad BD name (1)
   fail: msg="Bad BD name - should be <COMPLEX>-<AP>_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
   when: >
-    (
-      (aci_ap_name == "ENT") and
-      (
-        ("SQL" in aci_work_name) or 
-        ("DB" in aci_work_name)
-      ) and 
-      (aci_bd_name is not match "^aci_complex_name-aci_ap_name_SQL$")
-    )
+    (aci_ap_name == "ENT") and
+    ( ("SQL" in aci_work_name) or ("DB" in aci_work_name) ) and 
+    (aci_bd_name is not regex "^aci_complex_name-aci_ap_name_SQL$")
 
 - name: Fail on bad BD name (2)
   fail: msg="Bad BD name.  Should be {{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
@@ -97,7 +87,7 @@
       ("SPLASH" in aci_work_name) or 
       ("NAS" in aci_work_name)
     ) and ( 
-      aci_bd_name is not match "^{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}$"
+      aci_bd_name is not regex "^aci_complex_name-aci_ap_name_aci_work_name$"
     )
 
 - name: Set Default PCI flag if not defined
