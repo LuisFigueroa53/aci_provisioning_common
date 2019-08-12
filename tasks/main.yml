@@ -37,25 +37,25 @@
   when: >
     (aci_ap_name == "ENT") and
     ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and
-    ( (aci_work_name is search "SQL") or (aci_work_name is search "DB") )
+    ( (aci_work_name is search("SQL")) or (aci_work_name is search("DB")) )
 
 - name: Set Default BD name if not provided (2)
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
   when: >
     (
-      (aci_work_name is search "ENGW") or 
-      (aci_work_name is search "IMPS") or 
-      (aci_work_name is search "DATAHUB") or 
-      (aci_work_name is search "MESB") or 
-      (aci_work_name is search "WESB") or 
-      (aci_work_name is search "TAAS") or 
-      (aci_work_name is search "EPRC") or 
-      (aci_work_name is search "ECRT") or 
-      (aci_work_name is search "EBURST") or 
-      (aci_work_name is search "NGGF") or 
-      (aci_work_name is search "SPLASH") or 
-      (aci_work_name is search "NAS")
+      (aci_work_name is search("ENGW")) or 
+      (aci_work_name is search("IMPS")) or 
+      (aci_work_name is search("DATAHUB")) or 
+      (aci_work_name is search("MESB")) or 
+      (aci_work_name is search("WESB")) or 
+      (aci_work_name is search("TAAS")) or 
+      (aci_work_name is search("EPRC")) or 
+      (aci_work_name is search("ECRT")) or 
+      (aci_work_name is search("EBURST")) or 
+      (aci_work_name is search("NGGF")) or 
+      (aci_work_name is search("SPLASH")) or 
+      (aci_work_name is search("NAS"))
     ) and (
       (aci_bd_name == "") or 
       (aci_bd_name is not defined)
@@ -70,25 +70,25 @@
   fail: msg="Bad BD name - should be <COMPLEX>-<AP>_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
   when: >
     (aci_ap_name == "ENT") and
-    ( (aci_work_name is search "SQL") or (aci_work_name is search "DB" ) and
+    ( (aci_work_name is search("SQL")) or (aci_work_name is search("DB")) and
     (aci_bd_name is not regex "^aci_complex_name-aci_ap_name_SQL$")
 
 - name: Fail on bad BD name (2)
   fail: msg="Bad BD name.  Should be {{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
   when: > 
     (
-      (aci_work_name is search "ENGW") or 
-      (aci_work_name is search "IMPS") or 
-      (aci_work_name is search "DATAHUB") or 
-      (aci_work_name is search "MESB") or 
-      (aci_work_name is search "WESB") or 
-      (aci_work_name is search "TAAS") or 
-      (aci_work_name is search "EPRC") or 
-      (aci_work_name is search "ECRT") or 
-      (aci_work_name is search "EBURST") or 
-      (aci_work_name is search "NGGF") or 
-      (aci_work_name is search "SPLASH") or 
-      (aci_work_name is search "NAS")
+      (aci_work_name is search("ENGW")) or 
+      (aci_work_name is search("IMPS")) or 
+      (aci_work_name is search("DATAHUB")) or 
+      (aci_work_name is search("MESB")) or 
+      (aci_work_name is search("WESB")) or 
+      (aci_work_name is search("TAAS")) or 
+      (aci_work_name is search("EPRC")) or 
+      (aci_work_name is search("ECRT")) or 
+      (aci_work_name is search("EBURST")) or 
+      (aci_work_name is search("NGGF")) or 
+      (aci_work_name is search("SPLASH")) or 
+      (aci_work_name is search("NAS"))
     ) and ( 
       aci_bd_name is not regex "^aci_complex_name-aci_ap_name_aci_work_name$"
     )
