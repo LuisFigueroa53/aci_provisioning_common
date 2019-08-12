@@ -35,9 +35,9 @@
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_SQL"
   when: >
-    (aci_ap_name == "ENT") and
-    ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and
-    ( (aci_work_name is search("SQL")) or (aci_work_name is search("DB")) )
+    (aci_ap_name == "ENT") and 
+    (aci_work_name is regex "(SQL|DB)$") and
+    ( (aci_bd_name == "") or (aci_bd_name is not defined) )
 
 - name: Set Default BD name if not provided (2)
   set_fact:
@@ -70,7 +70,7 @@
   fail: msg="Bad BD name - should be COMPLEX-AP_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
   when: >
     (aci_ap_name == "ENT") and
-    ( (aci_work_name is search("SQL")) or (aci_work_name is search("DB")) ) and
+    (aci_work_name is regex "(SQL|DB)$") and
     (aci_bd_name is not regex "^aci_complex_name-aci_ap_name_SQL$")
 
 - name: Fail on bad BD name (2)
