@@ -45,7 +45,10 @@
     ) 
     and 
     (
-      (  (aci_work_name is search("ENGW")) or (aci_work_name is search("NAS") ) 
+      (  
+        (aci_work_name is search("ENGW")) or 
+        (aci_work_name is search("NAS") 
+      ) 
       or
       (
         ( aci_complex_name is regex "[CDTU]B" ) 
