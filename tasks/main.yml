@@ -23,6 +23,11 @@
   set_fact:
     aci_hostname: "{% if aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% elif aci_tn_name is match '(Prod|Test|DV)' %}TP-APIC-HD3-1{% else %}CL-APIC-HD1-1{% endif %}.tvlport.net"
 
+- name: Check if EPG exists
+  include_tasks:
+    check_epg.yml
+
+
 - name: Update tenant for T5
   set_fact: 
     aci_tn_name: "{{ aci_tn_name[2:] }}"
@@ -82,24 +87,18 @@
 - name: Fail on bad BD name (2)
   fail: msg="Bad BD name.  Should be {{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
   when: > 
-    ( 
-      aci_bd_name is not regex "^{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}$"
-    )
-    and 
+    ( (aci_bd_name == "") or  (aci_bd_name is not defined) ) and 
     (
-      (  
-        (aci_work_name is search("ENGW")) or 
-        (aci_work_name is search("NAS"))
-      )
+      ( (aci_work_name is search("ENGW")) or (aci_work_name is search("NAS")) ) 
       or
       (
-        ( aci_complex_name is regex "[CDTU]F" )
+        ( aci_complex_name is match "[CDTU]F" )
         and
         (aci_work_name is search("IMPS"))
       )
       or
       (
-        ( aci_complex_name is regex "[CDTU]B" ) 
+        ( aci_complex_name is match "[CDTU]B" ) 
         and
         (
           (aci_work_name is search("DATAHUB")) or 
