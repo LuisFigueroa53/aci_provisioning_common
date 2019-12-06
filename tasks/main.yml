@@ -35,11 +35,11 @@
 - name: Create EPG if it doesn't already exist
   include_tasks:
     create_epg.yml
-  when: createEPG
+  when: "{{ createEPG | default('False') }}"
 
 - name: Add vmm domain to EPG if needed
   include_tasks:
     modify_epg-vmmdomain.yml
-  when: addVMM
+  when: "{{ addVMM | default('False') }}"
 
 
