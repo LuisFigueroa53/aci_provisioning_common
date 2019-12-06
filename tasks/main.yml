@@ -23,9 +23,48 @@
   set_fact:
     aci_hostname: "{% if aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% elif aci_tn_name is match '(Prod|Test|DV)' %}TP-APIC-HD3-1{% else %}CL-APIC-HD1-1{% endif %}.tvlport.net"
 
-- name: Check if EPG exists
-  include_tasks:
-    check_epg.yml
+
+- name: Validate EPG exists -- {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
+  aci_epg:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    epg: "{{ aci_ap_name }}"
+    state: query
+  delegate_to: localhost
+  register: epgCheck
+
+- name: Validate VMWare domain if requested -- {{ vmware_datacenter }}
+  aci_epg_to_domain:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    epg: "{{ aci_epg_name }}"
+    domain_type: vmm
+    vm_provider: vmware
+    domain: "{{ vmware_datacenter }}"
+    state: query
+  delegate_to: localhost
+  register: vmmCheck
+  when: vmware_datacenter is defined
+
+- name: Exit if EPG good and no VMM
+  meta: end_play
+  when: epgCheck['current'][0] is defined and vmware_datacenter is not defined
+
+- name: Exit if EPG good and VMM good
+  meta: end_play
+  when: epgCheck['current'][0] is defined and vmware_datacenter in vmmCheck['current']
+
+
+
+
 
 - name: Update tenant for T5
   set_fact: 
