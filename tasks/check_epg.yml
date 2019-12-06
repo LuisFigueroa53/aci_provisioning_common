@@ -44,14 +44,15 @@
   delegate_to: localhost
   register: checkEpg
 
+- name: Test Fail
+  fail:
+    msg: "{{ checkEpg }}"
+
 - name: Do we need to create EPG
   set_fact:
     createEPG: true
   when: checkEpg['current'][0] is not defined
 
-- name: Test Fail
-  fail:
-    msg: "{{ checkEpg }}"
 
 - name: Validate VMWare domain if requested -- {{ vmware_datacenter }}
   aci_epg_to_domain:
