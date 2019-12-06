@@ -85,29 +85,40 @@
     (aci_work_name is regex "(SQL|DB)$") and
     (aci_bd_name is not regex "^aci_complex_name-aci_ap_name_SQL$")
 
-
-- name: Debug BD Fail 2
-  debug: msg="work==={{ aci_ap_name}}=== / bd==={{ aci_bd_name }}=== / urlencode==={{ aci_bd_name|urlencode() }}==="
-  
-
 - name: Fail on bad BD name (2)
   fail: msg="Bad BD name.  Should be {{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
   when: > 
-    (
-      (aci_work_name is search("ENGW")) or 
-      (aci_work_name is search("IMPS")) or 
-      (aci_work_name is search("DATAHUB")) or 
-      (aci_work_name is search("MESB")) or 
-      (aci_work_name is search("WESB")) or 
-      (aci_work_name is search("TAAS")) or 
-      (aci_work_name is search("EPRC")) or 
-      (aci_work_name is search("ECRT")) or 
-      (aci_work_name is search("EBURST")) or 
-      (aci_work_name is search("NGGF")) or 
-      (aci_work_name is search("SPLASH")) or 
-      (aci_work_name is search("NAS"))
-    ) and ( 
+    ( 
       aci_bd_name is not regex "^{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}$"
+    )
+    and 
+    (
+      (  
+        (aci_work_name is search("ENGW")) or 
+        (aci_work_name is search("NAS"))
+      )
+      or
+      (
+        ( aci_complex_name is regex "[CDTU]F" )
+        and
+        (aci_work_name is search("IMPS"))
+      )
+      or
+      (
+        ( aci_complex_name is regex "[CDTU]B" ) 
+        and
+        (
+          (aci_work_name is search("DATAHUB")) or 
+          (aci_work_name is search("MESB")) or 
+          (aci_work_name is search("WESB")) or 
+          (aci_work_name is search("TAAS")) or 
+          (aci_work_name is search("EPRC")) or 
+          (aci_work_name is search("ECRT")) or 
+          (aci_work_name is search("EBURST")) or 
+          (aci_work_name is search("NGGF")) or 
+          (aci_work_name is search("SPLASH"))
+        )
+      )
     )
 
 - name: Set Default PCI flag if not defined
