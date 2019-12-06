@@ -31,7 +31,7 @@
   fail: msg="AP does not exist - {{ aci_hostname }} / {{ aci_ap_name }} "
   when: checkAp['current'][0] is not defined
 
-- name: Validate EPG exists -- {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
+- name: Validate EPG exists -- {{ aci_hostname }} / {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
   aci_epg:
     validate_certs: false
     host: "{{ aci_hostname }}"
