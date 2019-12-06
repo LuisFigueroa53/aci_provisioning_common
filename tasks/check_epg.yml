@@ -49,6 +49,10 @@
     createEPG: true
   when: checkEpg['current'][0] is not defined
 
+- name: Test Fail
+  fail:
+    msg: checkEpg
+
 - name: Validate VMWare domain if requested -- {{ vmware_datacenter }}
   aci_epg_to_domain:
     validate_certs: false
