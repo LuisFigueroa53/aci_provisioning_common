@@ -41,7 +41,7 @@
     ( (aci_bd_name == "") or (aci_bd_name is not defined) )
 
 - name: Debug
-  warn: msg="{{ aci_complex_name }} / {{ aci_work_name }}"
+  debug: msg="{{ aci_complex_name }} / {{ aci_work_name }}"
   
 - name: Set Default BD name if not provided (2)
   set_fact:
