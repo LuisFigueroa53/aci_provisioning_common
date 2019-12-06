@@ -41,22 +41,34 @@
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
   when: >
     (
-      (aci_work_name is search("ENGW")) or 
-      (aci_work_name is search("IMPS")) or 
-      (aci_work_name is search("DATAHUB")) or 
-      (aci_work_name is search("MESB")) or 
-      (aci_work_name is search("WESB")) or 
-      (aci_work_name is search("TAAS")) or 
-      (aci_work_name is search("EPRC")) or 
-      (aci_work_name is search("ECRT")) or 
-      (aci_work_name is search("EBURST")) or 
-      (aci_work_name is search("NGGF")) or 
-      (aci_work_name is search("SPLASH")) or 
-      (aci_work_name is search("NAS"))
-    ) and (
-      (aci_bd_name == "") or 
-      (aci_bd_name is not defined)
-    )
+      (aci_bd_name == "") or  (aci_bd_name is not defined)
+    ) 
+    and 
+    (
+      (  (aci_work_name is search("ENGW")) or (aci_work_name is search("NAS") ) 
+      or
+      (
+        ( aci_complex_name is regex "[CDTU]B" ) 
+        and
+        (
+          (aci_work_name is search("DATAHUB")) or 
+          (aci_work_name is search("MESB")) or 
+          (aci_work_name is search("WESB")) or 
+          (aci_work_name is search("TAAS")) or 
+          (aci_work_name is search("EPRC")) or 
+          (aci_work_name is search("ECRT")) or 
+          (aci_work_name is search("EBURST")) or 
+          (aci_work_name is search("NGGF")) or 
+          (aci_work_name is search("SPLASH"))
+        )
+      )
+      or
+      (
+        ( aci_complex_name is regex "[CDTU]F" )
+        and
+        (aci_work_name is search("IMPS"))
+      )
+    ) 
 
 - name: Set Default BD if not provided (3)
   set_fact: 
