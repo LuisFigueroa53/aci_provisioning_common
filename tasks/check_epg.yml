@@ -71,16 +71,15 @@
   register: checkVmm
   when: (vmware_datacenter is defined) and (not createEPG)
 
-- name: Is VM domain attached to this EPG
+- name: Flag addVMM if createEPG = true
   set_fact:
     addVMM: true
-  when: >
-    (vmware_datacenter is defined) and
-    (
-      (checkVmm['current'][0] == "") or
-      (checkVmm['current'][0] is not defined) or
-      createEPG
-    )
+  when: (vmware_datacenter is defined) and (createEPG)
+  
+- name: Flag addVMM if VMM not on EPG
+  set_fact:
+    addVMM: true
+  when: (vmware_datacenter is defined) and (vmware_datacenter is not in checkVmm['current'])
 
 - name: Debug check_epg
   debug:
