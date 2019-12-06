@@ -49,3 +49,26 @@
     createEPG: true
   when: (checkEpg['current'][0] == "") or (checkEpg['current'][0] is not defined)
 
+- name: Validate VMWare domain if requested -- {{ vmware_datacenter }}
+  aci_epg_to_domain:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    epg: "{{ aci_epg_name }}"
+    domain_type: vmm
+    vm_provider: vmware
+    domain: "{{ vmware_datacenter }}"
+    state: query
+  delegate_to: localhost
+  register: checkVmm
+  when: vmware_datacenter is defined
+
+- name: Is VM domain attached to this EPG
+  set_fact:
+    addVMM: true
+  when: ( (checkEpg['current'][0] == "") or (checkEpg['current'][0] is not defined) ) and vmware_datacenter is defined
+
+
