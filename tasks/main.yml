@@ -74,7 +74,7 @@
       aci_work_name is search("ENGW") or 
       aci_work_name is search("NAS")
     ) and
-    ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and 
+    ( (aci_bd_name == "") or (aci_bd_name is not defined) )
 
 - name: Set Default BD if not provided (Common)
   set_fact: 
