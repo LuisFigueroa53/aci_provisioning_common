@@ -32,7 +32,7 @@
     aci_tn_name: "{{ aci_tn_name[2:] }}"
   when: aci_tn_name is match "^T5"  
 
-- name: Set Default BD name if not provided (1)
+- name: Set Default BD name if not provided (SQL)
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_SQL"
   when: >
@@ -43,33 +43,40 @@
 - name: Debug
   debug: msg="{{ aci_complex_name }} / {{ aci_work_name }}"
   
-- name: Set Default BD name if not provided (2)
+- name: Set Default BD name if not provided (Special FE)
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
   when: >
     ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and 
+    ( aci_complex_name is match "[CDTU]F" ) and
+    ( aci_work_name is search("IMPS"))
+
+- name: Set Default BD name if not provided (Special BE)
+  set_fact:
+    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
+  when: >
+    ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and 
+    ( aci_complex_name is match "[CDTU]B" ) and
     (
-      ( (aci_work_name is search("ENGW")) or (aci_work_name is search("NAS")) ) or
-      (
-        ( aci_complex_name is regex "^(C|D|T|U)F$" ) and
-        (aci_work_name is search("IMPS"))
-      ) or (
-        ( aci_complex_name is regex "^(C|D|T|U)B$" ) and
-        (
-          (aci_work_name is search("DATAHUB")) or 
-          (aci_work_name is search("MESB")) or 
-          (aci_work_name is search("WESB")) or 
-          (aci_work_name is search("TAAS")) or 
-          (aci_work_name is search("EPRC")) or 
-          (aci_work_name is search("ECRT")) or 
-          (aci_work_name is search("EBURST")) or 
-          (aci_work_name is search("NGGF")) or 
-          (aci_work_name is search("SPLASH"))
-        )
-      )
+      (aci_work_name is search("DATAHUB")) or 
+      (aci_work_name is search("MESB")) or 
+      (aci_work_name is search("WESB")) or 
+      (aci_work_name is search("TAAS")) or 
+      (aci_work_name is search("EPRC")) or 
+      (aci_work_name is search("ECRT")) or 
+      (aci_work_name is search("EBURST")) or 
+      (aci_work_name is search("NGGF")) or 
+      (aci_work_name is search("SPLASH"))
     )
 
-- name: Set Default BD if not provided (3)
+- name: Set Default BD name if not provided (Special BE or FE)
+  set_fact:
+    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
+  when: >
+    ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and 
+    ( aci_work_name is search("ENGW") or (aci_work_name is search("NAS")) )
+
+- name: Set Default BD if not provided (Common)
   set_fact: 
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}"
   when: (aci_bd_name == "") or (aci_bd_name is not defined)
