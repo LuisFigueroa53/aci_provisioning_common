@@ -70,8 +70,11 @@
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
   when: >
+    ( 
+      aci_work_name is search("ENGW") or 
+      (aci_work_name is search("NAS")
+    ) and
     ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and 
-    ( aci_work_name is search("ENGW") or (aci_work_name is search("NAS")) )
 
 - name: Set Default BD if not provided (Common)
   set_fact: 
