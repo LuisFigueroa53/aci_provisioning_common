@@ -78,4 +78,5 @@
     )
 
 - name: Debug check_epg
+  debug:
     msg: "EPG = {{ createEPG }} and VMM = {{ addVMM }}"
