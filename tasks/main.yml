@@ -14,6 +14,11 @@
     aci_ap_name: "{{ aci_vlan_name.split('|')[1] | trim }}"
     aci_epg_name: "{{ aci_vlan_name.split('|')[2] | trim }}"
 
+- name: Update tenant for T5
+  set_fact: 
+    aci_tn_name: "{{ aci_tn_name[2:] }}"
+  when: aci_tn_name is match "^T5"  
+
 - name: Set Complex, Work vars
   set_fact:
     aci_complex_name: "{{ aci_epg_name.split('_')[0] | trim }}"
@@ -23,212 +28,12 @@
   set_fact:
     aci_hostname: "{% if aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% elif aci_tn_name is match '(Prod|Test|DV)' %}TP-APIC-HD3-1{% else %}CL-APIC-HD1-1{% endif %}.tvlport.net"
 
-
-- name: Validate EPG exists -- {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
-  aci_epg:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    ap: "{{ aci_ap_name }}"
-    epg: "{{ aci_ap_name }}"
-    state: query
-  delegate_to: localhost
-  register: epgCheck
-
-- name: Validate VMWare domain if requested -- {{ vmware_datacenter }}
-  aci_epg_to_domain:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    ap: "{{ aci_ap_name }}"
-    epg: "{{ aci_epg_name }}"
-    domain_type: vmm
-    vm_provider: vmware
-    domain: "{{ vmware_datacenter }}"
-    state: query
-  delegate_to: localhost
-  register: vmmCheck
-  when: vmware_datacenter is defined
-
-- name: Exit if EPG good and no VMM
-  meta: end_play
-  when: epgCheck['current'][0] is defined and vmware_datacenter is not defined
-
-- name: Exit if EPG good and VMM good
-  meta: end_play
-  when: epgCheck['current'][0] is defined and vmware_datacenter in vmmCheck['current']
-
-
-
-
-
-- name: Update tenant for T5
-  set_fact: 
-    aci_tn_name: "{{ aci_tn_name[2:] }}"
-  when: aci_tn_name is match "^T5"  
-
-- name: Set Default BD name if not provided (SQL)
-  set_fact:
-    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_SQL"
-  when: >
-    (aci_ap_name == "ENT") and 
-    (aci_work_name is regex "(SQL|DB)$") and
-    ( (aci_bd_name == "") or (aci_bd_name is not defined) )
-
-- name: Set Default BD name if not provided (Special FE)
-  set_fact:
-    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
-  when: >
-    ( aci_work_name is search("IMPS") ) and
-    ( aci_complex_name is match "[CDTU]F" ) and
-    ( (aci_bd_name == "") or (aci_bd_name is not defined) )
-
-- name: Set Default BD name if not provided (Special BE)
-  set_fact:
-    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
-  when: >
-    (
-      aci_work_name is search("DATAHUB") or 
-      aci_work_name is search("MESB") or 
-      aci_work_name is search("WESB") or 
-      aci_work_name is search("TAAS") or 
-      aci_work_name is search("EPRC") or 
-      aci_work_name is search("ECRT") or 
-      aci_work_name is search("EBURST") or 
-      aci_work_name is search("NGGF") or 
-      aci_work_name is search("SPLASH")
-    ) and
-    ( aci_complex_name is match "[CDTU]B" ) and
-    ( (aci_bd_name == "") or (aci_bd_name is not defined) )
-
-- name: Set Default BD name if not provided (Special BE or FE)
-  set_fact:
-    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
-  when: >
-    ( 
-      aci_work_name is search("ENGW") or 
-      aci_work_name is search("NAS")
-    ) and
-    ( (aci_bd_name == "") or (aci_bd_name is not defined) )
-
-- name: Set Default BD if not provided (Common)
-  set_fact: 
-    aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}"
-  when: (aci_bd_name == "") or (aci_bd_name is not defined)
-
-- name: Fail on bad BD name (1)
-  fail: msg="Bad BD name - should be COMPLEX-AP_SQL when Workload is DB or SQL -- name provided was {{ aci_bd_name }}"
-  when: >
-    (aci_ap_name == "ENT") and
-    (aci_work_name is regex "(SQL|DB)$") and
-    (aci_bd_name is not regex "^aci_complex_name-aci_ap_name_SQL$")
-
-- name: Fail on bad BD name (2)
-  fail: msg="Bad BD name.  Should be {{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
-  when: > 
-    ( (aci_bd_name == "") or  (aci_bd_name is not defined) ) and 
-    (
-      ( (aci_work_name is search("ENGW")) or (aci_work_name is search("NAS")) ) 
-      or
-      (
-        ( aci_complex_name is match "[CDTU]F" )
-        and
-        (aci_work_name is search("IMPS"))
-      )
-      or
-      (
-        ( aci_complex_name is match "[CDTU]B" ) 
-        and
-        (
-          (aci_work_name is search("DATAHUB")) or 
-          (aci_work_name is search("MESB")) or 
-          (aci_work_name is search("WESB")) or 
-          (aci_work_name is search("TAAS")) or 
-          (aci_work_name is search("EPRC")) or 
-          (aci_work_name is search("ECRT")) or 
-          (aci_work_name is search("EBURST")) or 
-          (aci_work_name is search("NGGF")) or 
-          (aci_work_name is search("SPLASH"))
-        )
-      )
-    )
-
-- name: Set Default PCI flag if not defined
-  set_fact:
-    aci_pci_epg: 0
-  when: (aci_pci_epg == "") or (aci_pci_epg is not defined)
-
-- name: Fail on bad PCI flag
-  fail: msg="Bad aci_pci_epg - should be 0 or 1 -- value provided was {{ aci_pci_epg }}"
-  when: (aci_pci_epg != 0) and (aci_pci_epg != 1)
-
-- name: Validate Tenant exists -- {{ aci_tn_name }}
-  aci_tenant:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    state: query
-  delegate_to: localhost
-  register: out
-
-- name: Fail on Non-Existant Tenant
-  fail: msg="Tenant does not exist - {{ aci_hostname }} / {{ aci_tn_name }} "
-  when: (out['current'][0] == "") or (out['current'][0] is not defined)
-
-- name: Validate Bridge Domain exists -- {{ aci_bd_name }}
-  aci_bd:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    bd: "{{ aci_bd_name }}"
-    state: query
-  delegate_to: localhost
-  register: out
-
-- name: Fail on Non-Existant BD
-  fail: msg="Bridge Domain does not exist - {{ aci_hostname }} / {{ aci_bd_name }} "
-  when: out['current'][0] is not defined
-
-- name: Validate AP exists -- {{ aci_ap_name }}
-  aci_ap:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    ap: "{{ aci_ap_name }}"
-    state: query
-  delegate_to: localhost
-  register: out
-
-- name: Fail on Non-Existant AP
-  fail: msg="AP does not exist - {{ aci_hostname }} / {{ aci_ap_name }} "
-  when: out['current'][0] is not defined
-
-- name: VeriValidate vCenter Domain exists if requested -- {{ vmware_datacenter }}
-  aci_rest:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    method: get
-    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vmware_datacenter }}")
-  delegate_to: localhost
-  register: out
-  when: (vmware_datacenter != "") and (vmware_datacenter is defined)
-
-- name: Fail on Non-Existant vCenter Domain if requested
-  fail: msg="vCenter Domain does not exist - {{ aci_hostname }} / {{ vmware_datacenter }} "
-  when: (vmware_datacenter != "") and (vmware_datacenter is defined) and (out['imdata'][0] is not defined)
-
-- name: Run EPG job
+- name: Check for existing EPG
   include_tasks:
-    configure_aci_onprem.yml
+    check_epg.yml
+
+- name: Create EPG if it doesn't already exist
+  include_tasks:
+    create_epg.yml
+  when: createEPG
+
