@@ -64,11 +64,16 @@
     state: query
   delegate_to: localhost
   register: checkVmm
-  when: vmware_datacenter is defined
+  when: (vmware_datacenter is defined) and (not createEPG)
 
 - name: Is VM domain attached to this EPG
   set_fact:
     addVMM: true
-  when: ( (checkEpg['current'][0] == "") or (checkEpg['current'][0] is not defined) ) and vmware_datacenter is defined
-
+  when: >
+    (vmware_datacenter is defined) and
+    (
+      (checkVmm['current'][0] == "") or
+      (checkVmm['current'][0] is not defined) or
+      createEPG
+    )
 
