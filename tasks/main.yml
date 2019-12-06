@@ -52,8 +52,6 @@
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
   when: >
-    ( (aci_bd_name == "") or (aci_bd_name is not defined) ) and 
-    ( aci_complex_name is match "[CDTU]B" ) and
     (
       aci_work_name is search("DATAHUB") or 
       aci_work_name is search("MESB") or 
@@ -64,7 +62,9 @@
       aci_work_name is search("EBURST") or 
       aci_work_name is search("NGGF") or 
       aci_work_name is search("SPLASH")
-    )
+    ) and
+    ( aci_complex_name is match "[CDTU]B" ) and
+    ( (aci_bd_name == "") or (aci_bd_name is not defined) )
 
 - name: Set Default BD name if not provided (Special BE or FE)
   set_fact:
