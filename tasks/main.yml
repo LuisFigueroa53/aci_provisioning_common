@@ -47,8 +47,14 @@
     (
       (  
         (aci_work_name is search("ENGW")) or 
-        (aci_work_name is search("NAS") 
-      ) 
+        (aci_work_name is search("NAS"))
+      )
+      or
+      (
+        ( aci_complex_name is regex "[CDTU]F" )
+        and
+        (aci_work_name is search("IMPS"))
+      )
       or
       (
         ( aci_complex_name is regex "[CDTU]B" ) 
@@ -65,13 +71,7 @@
           (aci_work_name is search("SPLASH"))
         )
       )
-      or
-      (
-        ( aci_complex_name is regex "[CDTU]F" )
-        and
-        (aci_work_name is search("IMPS"))
-      )
-    ) 
+    )
 
 - name: Set Default BD if not provided (3)
   set_fact: 
