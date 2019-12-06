@@ -1,5 +1,10 @@
 ## aci_provisioning_common::tasks::check_epg.yml
 
+- name: Define variables
+  set_fact:
+    createEPG: false
+    addVMM: false
+
 - name: Validate Tenant exists -- {{ aci_tn_name }}
   aci_tenant:
     validate_certs: false
@@ -79,4 +84,4 @@
 
 - name: Debug check_epg
   debug:
-    msg: "EPG = {{ createEPG | default('False') }} and VMM = {{ addVMM | default('False') }}"
+    msg: "EPG = {{ createEPG }} and VMM = {{ addVMM }}"
