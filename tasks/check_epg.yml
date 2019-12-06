@@ -79,7 +79,7 @@
 - name: Flag addVMM if VMM not on EPG
   set_fact:
     addVMM: true
-  when: (vmware_datacenter is defined) and (vmware_datacenter is not in checkVmm['current'])
+  when: (vmware_datacenter is defined) and (vmware_datacenter is not in checkVmm.current)
 
 - name: Debug check_epg
   debug:
