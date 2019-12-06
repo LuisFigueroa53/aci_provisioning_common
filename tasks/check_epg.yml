@@ -1,5 +1,36 @@
 ## aci_provisioning_common::tasks::check_epg.yml
 
+- name: Validate Tenant exists -- {{ aci_tn_name }}
+  aci_tenant:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    state: query
+  delegate_to: localhost
+  register: checkTn
+
+- name: Fail on Non-Existant Tenant
+  fail: msg="Tenant does not exist - {{ aci_hostname }} / {{ aci_tn_name }} "
+  when: (checkTn['current'][0] == "") or (checkTn['current'][0] is not defined)
+
+- name: Validate AP exists -- {{ aci_ap_name }}
+  aci_ap:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    state: query
+  delegate_to: localhost
+  register: checkAp
+
+- name: Fail on Non-Existant AP
+  fail: msg="AP does not exist - {{ aci_hostname }} / {{ aci_ap_name }} "
+  when: (checkAp['current'][0] == "") or (checkAp['current'][0] is not defined)
+
 - name: Validate EPG exists -- {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
   aci_epg:
     validate_certs: false
@@ -11,29 +42,10 @@
     epg: "{{ aci_ap_name }}"
     state: query
   delegate_to: localhost
-  register: epgCheck
+  register: checkEpg
 
-- name: Validate VMWare domain if requested -- {{ vmware_datacenter }}
-  aci_epg_to_domain:
-    validate_certs: false
-    host: "{{ aci_hostname }}"
-    username: "{{ aci_username }}"
-    password: "{{ aci_password }}"
-    tenant: "{{ aci_tn_name }}"
-    ap: "{{ aci_ap_name }}"
-    epg: "{{ aci_epg_name }}"
-    domain_type: vmm
-    vm_provider: vmware
-    domain: "{{ vmware_datacenter }}"
-    state: query
-  delegate_to: localhost
-  register: vmmCheck
-  when: vmware_datacenter is defined
+- name: Do we need to create EPG
+  set_fact:
+    createEPG: true
+  when: (checkEpg['current'][0] == "") or (checkEpg['current'][0] is not defined)
 
-- name: Exit if EPG good and no VMM
-  meta: end_play
-  when: epgCheck['current'][0] is defined and vmware_datacenter is not defined
-
-- name: Exit if EPG good and VMM good
-  meta: end_play
-  when: epgCheck['current'][0] is defined and vmware_datacenter in vmmCheck['current']
