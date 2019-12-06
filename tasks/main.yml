@@ -40,6 +40,9 @@
     (aci_work_name is regex "(SQL|DB)$") and
     ( (aci_bd_name == "") or (aci_bd_name is not defined) )
 
+- name: Debug
+  warn: msg="{{ aci_complex_name }} / {{ aci_work_name }}"
+  
 - name: Set Default BD name if not provided (2)
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
