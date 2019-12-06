@@ -51,7 +51,7 @@
 
 - name: Test Fail
   fail:
-    msg: checkEpg
+    msg: "{{ checkEpg }}"
 
 - name: Validate VMWare domain if requested -- {{ vmware_datacenter }}
   aci_epg_to_domain:
