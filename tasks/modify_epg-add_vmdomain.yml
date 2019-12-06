@@ -1,0 +1,31 @@
+## aci_provisioning_common::tasks::modify_epg-add_vmdomain.yml
+
+- name: Verify vCenter Domain exists if requested -- {{ vmware_datacenter }}
+  aci_rest:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    method: get
+    path: /api/class/compDom.xml?query-target-filter=eq(compDom.name,"{{ vmware_datacenter }}")
+  delegate_to: localhost
+  register: checkVmm
+
+- name: Fail on Non-Existant vCenter Domain if requested
+  fail: msg="vCenter Domain does not exist - {{ aci_hostname }} / {{ vmware_datacenter }} "
+  when: checkVmm['imdata'][0] is not defined
+
+- name: Add VMWare domain if requested -- {{ vmware_datacenter }}
+  aci_epg_to_domain:
+    validate_certs: false
+    host: "{{ aci_hostname }}"
+    username: "{{ aci_username }}"
+    password: "{{ aci_password }}"
+    tenant: "{{ aci_tn_name }}"
+    ap: "{{ aci_ap_name }}"
+    epg: "{{ aci_epg_name }}"
+    domain_type: vmm
+    vm_provider: vmware
+    domain: "{{ vmware_datacenter }}"
+  delegate_to: localhost
+
