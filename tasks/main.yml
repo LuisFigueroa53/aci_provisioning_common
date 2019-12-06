@@ -37,3 +37,9 @@
     create_epg.yml
   when: createEPG
 
+- name: Add vmm domain to EPG if needed
+  include_tasks:
+    modify_epg-vmmdomain.yml
+  when: addVMM
+
+
