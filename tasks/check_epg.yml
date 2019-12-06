@@ -13,7 +13,7 @@
 
 - name: Fail on Non-Existant Tenant
   fail: msg="Tenant does not exist - {{ aci_hostname }} / {{ aci_tn_name }} "
-  when: (checkTn['current'][0] == "") or (checkTn['current'][0] is not defined)
+  when: checkTn['current'][0] is not defined
 
 - name: Validate AP exists -- {{ aci_ap_name }}
   aci_ap:
@@ -29,7 +29,7 @@
 
 - name: Fail on Non-Existant AP
   fail: msg="AP does not exist - {{ aci_hostname }} / {{ aci_ap_name }} "
-  when: (checkAp['current'][0] == "") or (checkAp['current'][0] is not defined)
+  when: checkAp['current'][0] is not defined
 
 - name: Validate EPG exists -- {{ aci_tn_name}}|{{ aci_ap_name }}|{{ aci_epg_name }}
   aci_epg:
@@ -47,7 +47,7 @@
 - name: Do we need to create EPG
   set_fact:
     createEPG: true
-  when: (checkEpg['current'][0] == "") or (checkEpg['current'][0] is not defined)
+  when: checkEpg['current'][0] is not defined
 
 - name: Validate VMWare domain if requested -- {{ vmware_datacenter }}
   aci_epg_to_domain:
