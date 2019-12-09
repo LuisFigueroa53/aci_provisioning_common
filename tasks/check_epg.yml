@@ -77,7 +77,7 @@
   when: (vmware_datacenter is defined) and (createEPG)
 
 - name: Print debug
-  fail:  msg="checkVmm = ---{{ checkVmm }}---"
+  fail:  msg="checkVmm = ---{{ checkVmm.current | default[] }}---"
   
 - name: Flag addVMM if VMM not on EPG
   set_fact:
