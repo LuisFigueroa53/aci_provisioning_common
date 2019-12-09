@@ -78,7 +78,7 @@
 
 - name: Flag addVMM
   set_fact:
-    addVMM: "{% if createEPG %}true{% elif checkVmm.current not defined %}true{% elif vmware_datacenter not in checkVmm.current %}true{% else %}false{% endif %}"
+    addVMM: "{% if createEPG %}true{% elif checkVmm.current is not defined %}true{% elif vmware_datacenter not in checkVmm.current %}true{% else %}false{% endif %}"
   when: vmware_datacenter is defined
 
 #  set_fact:
