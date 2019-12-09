@@ -71,28 +71,10 @@
   register: checkVmm
   when: (vmware_datacenter is defined) and (not createEPG)
 
-- name: Flag addVMM if createEPG = true
-  set_fact:
-    addVMM: true
-  when: (vmware_datacenter is defined) and (createEPG)
-
 - name: Flag addVMM
   set_fact:
     addVMM: "{% if createEPG %}true{% elif checkVmm.current is not defined %}true{% elif vmware_datacenter not in checkVmm.current %}true{% else %}false{% endif %}"
   when: vmware_datacenter is defined
 
-#  set_fact:
-#    aviController: "avi-{% if workloadLabel is regex '^PROD' %}prod{% elif workloadLabel is regex '^(PREPROD|UAT|DV)' %}nonprod{% elif workloadLabel is regex '^CERTLAB' %}certlab{% endif %}"
-#  when: ('aviController' not in aviDict)
-
-- name: Print debug
-  fail:  msg="addVMM = {{ addVMM }}"
-  
-- name: Flag addVMM if VMM not on EPG
-  set_fact:
-    addVMM: true
-  when: (vmware_datacenter is defined) and (vmware_datacenter not in checkVmm.current)
-
 - name: Debug check_epg
-  debug:
-    msg: "EPG = {{ createEPG }} and VMM = {{ addVMM }}"
+  fail: msg="EPG = {{ createEPG }} and VMM = {{ addVMM }}"
