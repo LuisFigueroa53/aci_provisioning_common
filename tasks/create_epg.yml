@@ -21,7 +21,7 @@
   set_fact:
     aci_bd_name: "{{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }}"
   when: >
-  #  ( aci_work_name is search("IMPS") ) and
+    ( aci_work_name is search("XYZ") ) and
     ( aci_complex_name is match "[CDTU]F" ) and
     ( (aci_bd_name == "") or (aci_bd_name is not defined) )
 
