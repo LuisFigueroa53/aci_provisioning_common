@@ -68,7 +68,7 @@
 - name: Fail on bad BD name (FE)
   fail: msg="Bad BD name.  Should be {{ aci_complex_name }}-{{ aci_ap_name }}_{{ aci_work_name }} -- name provided was {{ aci_bd_name }}."
   when: > 
-    ( aci_work_name is search("IMPS") ) and
+    ( aci_work_name is search("xIMPS") ) and
     ( aci_complex_name is match "[CDTU]F" ) and
     ( aci_bd_name is not regex "^aci_complex_name-aci_ap_name_aci_work_name$")
 
