@@ -87,7 +87,7 @@
       aci_work_name is search("SPLASH")
     ) and
     ( aci_complex_name is match "[CDTU]B" ) and
-    ( aci_complex_name+'-'+aci_ap_name+'_'+aci+work_name is not match(aci_bd_name) )
+    ( aci_complex_name+'-'+aci_ap_name+'_'+aci_work_name is not match(aci_bd_name) )
 #    ( aci_bd_name is not regex "aci_complex_name-aci_ap_name_aci_work_name")
 
 
