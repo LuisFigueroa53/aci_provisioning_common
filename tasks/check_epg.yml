@@ -5,10 +5,6 @@
     createEPG: false
     addVMM: false
 
-## DEBUG
-- name: Debug
-  debug: msg="APIC = {{ aci_hostname }} and Tenant = {{ aci_tn_name }}"
-
 - name: Validate Tenant exists -- {{ aci_tn_name }}
   aci_tenant:
     validate_certs: false
