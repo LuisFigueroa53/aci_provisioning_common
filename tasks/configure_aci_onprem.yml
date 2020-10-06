@@ -43,6 +43,7 @@
     domain_type: vmm
     vm_provider: vmware
     domain: "{{ vmware_datacenter }}"
+    resolution_immediacy : "pre-provision"
   delegate_to: localhost
   when: vmware_datacenter is defined
   
