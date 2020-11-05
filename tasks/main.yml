@@ -30,7 +30,7 @@
 
 -name: Check for existing EPG
   include_tasks:
-  check_epg.yml
+    check_epg.yml
 
 - name: Create EPG if it doesn't already exist
   include_tasks:
