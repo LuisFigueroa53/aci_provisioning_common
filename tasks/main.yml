@@ -28,7 +28,7 @@
   set_fact:
     aci_hostname: "{% if aci_tn_name is match '^T5' %}TP-APIC-AP1-1{% elif aci_tn_name is match '(Prod|Test|DV)' %}TP-APIC-HD3-1{% else %}CL-APIC-HD1-1{% endif %}.tvlport.net"
 
--name: Check for existing EPG
+- name: Check for existing EPG
   include_tasks:
     check_epg.yml
 
